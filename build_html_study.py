@@ -20,6 +20,7 @@ BASE = Path(r"c:\Users\ruben\OneDrive\Desktop\LifeEvertsLauraExamen")
 GUIDE_PATH = BASE / "STUDIEGIDS_LIFE_EVENTS.md"
 FLASHCARDS_PATH = BASE / "FLASHCARDS_LIFE_EVENTS.md"
 OUTPUT_PATH = BASE / "life_events_study.html"
+INDEX_OUTPUT_PATH = BASE / "index.html"
 
 
 def parse_flashcards(path: Path) -> list[dict]:
@@ -2224,7 +2225,9 @@ html = f"""<!DOCTYPE html>
 """
 
 OUTPUT_PATH.write_text(html, encoding="utf-8")
+INDEX_OUTPUT_PATH.write_text(html, encoding="utf-8")
 print(f"Created: {OUTPUT_PATH}")
+print(f"Created: {INDEX_OUTPUT_PATH}")
 print(f"Cards embedded: {len(cards)}")
 print(f"MC questions: {len(mc_questions)} ({sum(1 for q in mc_questions if q['section'] == EXAM_SECTION_RECON)} uit 1e zit)")
 print(f"Mindmaps: {len(MINDMAPS)}")
