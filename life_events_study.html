@@ -1,0 +1,3127 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Life Events — Studiegids & Flashcards</title>
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --surface: #ffffff;
+      --text: #1a2332;
+      --muted: #5c6b7a;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --border: #e2e8f0;
+      --success: #059669;
+      --warning: #d97706;
+      --shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+      --radius: 12px;
+      --sidebar-w: 260px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .app-header h1 {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+    .tabs {
+      display: flex;
+      gap: 0.35rem;
+      background: var(--bg);
+      padding: 0.25rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+    }
+    .tab {
+      border: none;
+      background: transparent;
+      padding: 0.45rem 1rem;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .tab.active {
+      background: var(--surface);
+      color: var(--accent);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: var(--sidebar-w) 1fr;
+      min-height: calc(100vh - 60px);
+    }
+    .sidebar {
+      position: sticky;
+      top: 60px;
+      height: calc(100vh - 60px);
+      overflow-y: auto;
+      padding: 1rem;
+      border-right: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .sidebar h2 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin: 0 0 0.75rem;
+    }
+    .sidebar a, .sidebar button.filter-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 0.5rem 0.65rem;
+      margin-bottom: 0.2rem;
+      border-radius: 8px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.88rem;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+    }
+    .sidebar a:hover, .sidebar button.filter-btn:hover {
+      background: var(--bg);
+    }
+    .sidebar a.active, .sidebar button.filter-btn.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .main {
+      padding: 1.5rem 2rem 3rem;
+      max-width: 920px;
+    }
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* Study guide */
+    .guide-content h2 {
+      margin-top: 2.5rem;
+      padding-top: 1rem;
+      border-top: 2px solid var(--border);
+      scroll-margin-top: 80px;
+    }
+    .guide-content h2:first-child { border-top: none; margin-top: 0; }
+    .guide-content h3 { color: var(--accent); margin-top: 1.5rem; }
+    .guide-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.92rem;
+      background: var(--surface);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .guide-content th, .guide-content td {
+      border: 1px solid var(--border);
+      padding: 0.6rem 0.75rem;
+      text-align: left;
+    }
+    .guide-content th { background: var(--accent-soft); }
+    .guide-content ul { padding-left: 1.25rem; }
+    .guide-content strong { color: #0f172a; }
+    .guide-content img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      margin: 1.25rem auto;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .guide-content blockquote {
+      margin: 0 0 1.5rem;
+      padding: 0.75rem 1rem;
+      background: var(--accent-soft);
+      border-left: 4px solid var(--accent);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      color: var(--muted);
+    }
+
+    /* Flashcards */
+    .fc-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+    .fc-toolbar select, .fc-toolbar button {
+      padding: 0.5rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .fc-toolbar button.primary {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+    .fc-progress {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+    .fc-progress-bar {
+      height: 6px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 0.35rem;
+    }
+    .fc-progress-fill {
+      height: 100%;
+      background: var(--success);
+      width: 0%;
+      transition: width 0.3s;
+    }
+    .fc-progress-fill.confirm {
+      background: linear-gradient(90deg, var(--warning), var(--success));
+    }
+    .fc-session-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.25rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+    .fc-session-stats strong { color: var(--text); }
+    .fc-stage {
+      position: relative;
+    }
+    .fc-stage-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 0.5rem;
+    }
+    .fc-stage-toolbar button {
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .fc-stage.fullscreen {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 2rem 2rem;
+      overflow: auto;
+    }
+    .fc-stage.fullscreen .fc-stage-toolbar {
+      max-width: 960px;
+      width: 100%;
+      margin: 0 auto 0.75rem;
+    }
+    .fc-stage.fullscreen .flashcard-wrap {
+      max-width: 960px;
+      width: 100%;
+      margin: auto;
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+    .fc-stage.fullscreen .flashcard {
+      width: 100%;
+      min-height: min(52vh, 520px);
+    }
+    .fc-stage.fullscreen .fc-question { font-size: clamp(1.35rem, 2.5vw, 1.85rem); }
+    .fc-stage.fullscreen .fc-answer { font-size: clamp(1.15rem, 2vw, 1.45rem); }
+    .fc-stage.fullscreen .fc-hint,
+    .fc-stage.fullscreen .fc-actions {
+      max-width: 960px;
+      width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .flashcard-wrap {
+      perspective: 1200px;
+      margin: 0 auto 1.5rem;
+      max-width: 640px;
+    }
+    .flashcard {
+      position: relative;
+      min-height: 280px;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      transition: transform 0.45s ease;
+    }
+    .flashcard.flipped { transform: rotateY(180deg); }
+    .fc-face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .fc-back { transform: rotateY(180deg); background: #f8fafc; }
+    .fc-section {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+    .fc-question {
+      font-size: 1.2rem;
+      font-weight: 600;
+      line-height: 1.45;
+    }
+    .fc-answer {
+      font-size: 1.05rem;
+      line-height: 1.55;
+    }
+    .fc-hint {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 0.5rem;
+    }
+    .fc-hint kbd {
+      display: inline-block;
+      padding: 0.1rem 0.4rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--surface);
+      font-size: 0.75rem;
+      font-family: inherit;
+    }
+    .fc-status-badge {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--warning);
+      margin-top: 0.75rem;
+      min-height: 1.25rem;
+    }
+    .fc-status-badge.confirm { color: #0d9488; }
+    .fc-actions {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .fc-actions button {
+      padding: 0.65rem 1.25rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .fc-actions button.known { border-color: var(--success); color: var(--success); }
+    .fc-actions button.unknown { border-color: var(--warning); color: var(--warning); }
+    .fc-weak-panel {
+      margin-top: 2.5rem;
+      padding: 1.25rem 1.5rem;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-radius: var(--radius);
+    }
+    .fc-weak-panel h3 {
+      margin: 0 0 0.35rem;
+      font-size: 1.1rem;
+      color: #9a3412;
+    }
+    .fc-weak-panel > p {
+      margin: 0 0 1rem;
+      font-size: 0.9rem;
+      color: #7c2d12;
+    }
+    .fc-weak-list {
+      display: grid;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+    .fc-weak-item {
+      background: white;
+      border: 1px solid #fdba74;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    .fc-weak-item:hover { border-color: #ea580c; }
+    .fc-weak-item .fail-count {
+      flex-shrink: 0;
+      background: #ffedd5;
+      color: #c2410c;
+      font-weight: 700;
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 999px;
+    }
+    .fc-weak-empty {
+      font-size: 0.9rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+    .fc-list {
+      display: grid;
+      gap: 0.5rem;
+      margin-top: 2rem;
+    }
+    .fc-list-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .fc-list-item.done { opacity: 0.55; text-decoration: line-through; }
+    .fc-list-item .tag {
+      font-size: 0.7rem;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+
+    /* Checklist */
+    .checklist {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+    .checklist label {
+      display: flex;
+      gap: 0.75rem;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      align-items: flex-start;
+    }
+    .checklist label:last-child { border-bottom: none; }
+    .checklist input { margin-top: 0.25rem; accent-color: var(--accent); }
+    .checklist input:checked + span { color: var(--success); text-decoration: line-through; }
+
+    /* Editor */
+    .editor-intro {
+      color: var(--muted);
+      margin: 0 0 1.25rem;
+      font-size: 0.95rem;
+    }
+    .editor-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .editor-toolbar button, .editor-toolbar label.btn-file {
+      padding: 0.5rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      font-size: 0.88rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .editor-toolbar button.primary {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+    .editor-toolbar button.danger {
+      border-color: #fca5a5;
+      color: #b91c1c;
+    }
+    .editor-toolbar label.btn-file input { display: none; }
+    .editor-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 1.25rem;
+      align-items: start;
+    }
+    .editor-search {
+      width: 100%;
+      padding: 0.6rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+      font-size: 0.95rem;
+    }
+    .editor-list {
+      max-height: 70vh;
+      overflow-y: auto;
+      display: grid;
+      gap: 0.4rem;
+      padding-right: 0.25rem;
+    }
+    .editor-list-item {
+      text-align: left;
+      padding: 0.65rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.88rem;
+    }
+    .editor-list-item:hover { background: var(--bg); }
+    .editor-list-item.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+    .editor-list-item .tag {
+      display: block;
+      font-size: 0.68rem;
+      color: var(--muted);
+      margin-bottom: 0.2rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .editor-form {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 80px;
+    }
+    .editor-form h3 { margin: 0 0 1rem; font-size: 1rem; }
+    .editor-form label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin: 0.75rem 0 0.35rem;
+    }
+    .editor-form label:first-of-type { margin-top: 0; }
+    .editor-form input, .editor-form select, .editor-form textarea {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font: inherit;
+      font-size: 0.95rem;
+    }
+    .editor-form textarea { min-height: 100px; resize: vertical; }
+    .editor-form-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1.25rem;
+    }
+    .editor-form-actions button {
+      padding: 0.55rem 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .editor-form-actions button.primary {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+    .editor-form-actions button.danger {
+      color: #b91c1c;
+      border-color: #fca5a5;
+    }
+    .editor-empty {
+      color: var(--muted);
+      font-style: italic;
+      padding: 2rem;
+      text-align: center;
+    }
+    .save-toast {
+      position: fixed;
+      bottom: 1.25rem;
+      right: 1.25rem;
+      background: #0f172a;
+      color: white;
+      padding: 0.65rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+      z-index: 200;
+    }
+    .save-toast.show { opacity: 1; }
+
+    /* Oefenexamen */
+    .exam-intro {
+      color: var(--muted);
+      margin: 0 0 1.25rem;
+      font-size: 0.95rem;
+    }
+    .exam-setup {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+    .exam-setup h2 { margin: 0 0 1rem; font-size: 1.1rem; }
+    .exam-setup-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: flex-end;
+      margin-bottom: 1rem;
+    }
+    .exam-setup label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .exam-setup select {
+      padding: 0.55rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font: inherit;
+      min-width: 160px;
+    }
+    .exam-setup button.primary {
+      padding: 0.6rem 1.25rem;
+      border-radius: 8px;
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .exam-progress {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+    .exam-question-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1rem;
+    }
+    .exam-question-card .exam-q-num {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .exam-question-card .exam-q-text {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+      line-height: 1.45;
+    }
+    .exam-options {
+      display: grid;
+      gap: 0.5rem;
+    }
+    .exam-option {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      padding: 0.75rem 1rem;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      background: var(--surface);
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .exam-option:hover { background: var(--bg); }
+    .exam-option input { margin-top: 0.2rem; accent-color: var(--accent); }
+    .exam-option.selected { border-color: var(--accent); background: var(--accent-soft); }
+    .exam-option.correct { border-color: var(--success); background: #ecfdf5; }
+    .exam-option.wrong { border-color: #ef4444; background: #fef2f2; }
+    .exam-option.missed { border-color: var(--success); background: #ecfdf5; opacity: 0.85; }
+    .exam-nav-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+    }
+    .exam-nav-btns button {
+      padding: 0.6rem 1.1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .exam-nav-btns button.primary {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+    .exam-nav-btns button.success {
+      background: var(--success);
+      color: white;
+      border-color: var(--success);
+    }
+    .exam-results {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+    .exam-score-big {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1.1;
+    }
+    .exam-score-sub { color: var(--muted); margin-top: 0.35rem; }
+    .exam-review-item {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-top: 0.75rem;
+      font-size: 0.92rem;
+    }
+    .exam-review-item.wrong { border-left: 4px solid #ef4444; }
+    .exam-review-item.right { border-left: 4px solid var(--success); }
+    .exam-history-list {
+      display: grid;
+      gap: 0.5rem;
+    }
+    .exam-history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.85rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      cursor: pointer;
+      text-align: left;
+      width: 100%;
+      font: inherit;
+    }
+    .exam-history-item:hover { background: var(--bg); }
+    .exam-history-item.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+    .exam-history-item .score { font-weight: 700; color: var(--accent); }
+    .exam-history-item .meta { font-size: 0.82rem; color: var(--muted); }
+    .exam-sidebar-hint {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin: 0.75rem 0 0;
+      line-height: 1.4;
+    }
+    .exam-empty {
+      color: var(--muted);
+      font-style: italic;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    #exam-nav .filter-btn { margin-bottom: 0.25rem; }
+
+    /* Mindmaps */
+    .mindmaps-intro {
+      color: var(--muted);
+      margin: 0 0 1rem;
+      font-size: 0.95rem;
+    }
+    .mm-group-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin: 0.85rem 0 0.35rem;
+      font-weight: 700;
+    }
+    .mm-group-label:first-child { margin-top: 0; }
+    .mm-nav-btn { font-size: 0.84rem; }
+    .mm-nav-btn.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .mm-subtitle {
+      color: var(--muted);
+      margin: -0.5rem 0 1.25rem;
+      font-size: 0.92rem;
+    }
+    .mm-diagram-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+      overflow-x: auto;
+      min-height: 320px;
+    }
+    .mm-diagram-wrap svg {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+    .panel-mindmaps { max-width: 1100px; }
+    .mm-loading {
+      color: var(--muted);
+      font-style: italic;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar {
+        position: static;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        padding: 0.75rem;
+      }
+      .sidebar h2 { width: 100%; }
+      .sidebar a, .sidebar button.filter-btn {
+        width: auto;
+        display: inline-block;
+        margin: 0;
+      }
+      .main { padding: 1rem; }
+      .editor-layout { grid-template-columns: 1fr; }
+      .editor-form { position: static; }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <h1>Life Events — Examen</h1>
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-panel="guide" role="tab">Studiegids</button>
+      <button class="tab" data-panel="flashcards" role="tab">Flashcards (<span id="tab-fc-count">175</span>)</button>
+      <button class="tab" data-panel="editor" role="tab">Bewerken</button>
+      <button class="tab" data-panel="exam" role="tab">Oefenexamen</button>
+      <button class="tab" data-panel="mindmaps" role="tab">Mindmaps</button>
+      <button class="tab" data-panel="checklist" role="tab">Checklist</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <h2 id="sidebar-title">Navigatie</h2>
+      <div id="guide-nav">
+        <a href="#1-hoorcollege-1-inleiding">HC1: Inleiding</a><a href="#2-hoorcollege-2-ouderschap">HC2: Ouderschap</a><a href="#3-hoorcollege-3-relaties">HC3: Relaties</a><a href="#4-hoorcollege-4-school-and-werk">HC4: School & Werk</a><a href="#5-hoorcollege-5-verlies">HC5: Verlies</a><a href="#6-hoorcollege-6-omgaan-met-life-events">HC6: Omgaan met LE</a><a href="#7-digitale-tools">Digitale Tools</a>
+      </div>
+      <div id="fc-nav" style="display:none"></div>
+      <div id="editor-nav" style="display:none">
+        <button class="filter-btn active" data-editor-section="all">Alle kaarten</button>
+        <button class="filter-btn" data-editor-section="Aanvullende flashcards (PDF-dekking)">Aanvullende flashcards (PDF-dekking)</button><button class="filter-btn" data-editor-section="Digitale Tools (snel)">Digitale Tools (snel)</button><button class="filter-btn" data-editor-section="Gemengde examenvragen">Gemengde examenvragen</button><button class="filter-btn" data-editor-section="Hoorcollege 1: Inleiding">Hoorcollege 1</button><button class="filter-btn" data-editor-section="Hoorcollege 2: Ouderschap">Hoorcollege 2</button><button class="filter-btn" data-editor-section="Hoorcollege 3: Relaties">Hoorcollege 3</button><button class="filter-btn" data-editor-section="Hoorcollege 4: School & Werk">Hoorcollege 4</button><button class="filter-btn" data-editor-section="Hoorcollege 5: Verlies">Hoorcollege 5</button><button class="filter-btn" data-editor-section="Hoorcollege 6: Omgaan met Life Events">Hoorcollege 6</button>
+      </div>
+      <div id="exam-nav" style="display:none">
+        <button class="filter-btn active" data-exam-section="all">Alle vragen</button>
+        <button class="filter-btn" data-exam-section="1e zit 2025-2026">1e zit 2025-2026</button><button class="filter-btn" data-exam-section="Digitale Tools">Digitale Tools</button><button class="filter-btn" data-exam-section="Hoorcollege 1: Inleiding">Hoorcollege 1: Inleiding</button><button class="filter-btn" data-exam-section="Hoorcollege 2: Ouderschap">Hoorcollege 2: Ouderschap</button><button class="filter-btn" data-exam-section="Hoorcollege 3: Relaties">Hoorcollege 3: Relaties</button><button class="filter-btn" data-exam-section="Hoorcollege 4: School & Werk">Hoorcollege 4: School & Werk</button><button class="filter-btn" data-exam-section="Hoorcollege 5: Verlies">Hoorcollege 5: Verlies</button><button class="filter-btn" data-exam-section="Hoorcollege 6: Omgaan met Life Events">Hoorcollege 6: Omgaan met Life Events</button>
+        <p class="exam-sidebar-hint">Kies een onderwerp en start een oefenexamen. Resultaten worden lokaal opgeslagen op dit apparaat.</p>
+        <h2 style="margin-top:1.25rem">Historiek</h2>
+        <div class="exam-history-list" id="exam-history-sidebar"></div>
+        <button type="button" class="filter-btn" id="btn-clear-exam-history" style="margin-top:0.5rem;color:#b91c1c">Wis historiek</button>
+      </div>
+      <div id="mindmap-nav" style="display:none">
+        <div class="mm-group-label">Hoorcollege 1</div><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc1">Inleiding</button><div class="mm-group-label">Hoorcollege 2</div><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc2">Ouderschap</button><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc2-kinderverlies">Artikel: verlies van een kind</button><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc2-gezinsstress">Artikel: gezinsstress Amsterdam</button><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc2-familiereflex">Familiereflex</button><div class="mm-group-label">Hoorcollege 3</div><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc3">Relaties</button><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc3-gender">Artikel: gender en TGD</button><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc3-inclusief">Artikel: inclusieve zorg</button><div class="mm-group-label">Hoorcollege 4</div><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc4">School en Werk</button><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc4-eclsk">Artikel: ECLS-K kindergarten</button><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc4-transitions">Artikel: Transitions-programma</button><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc4-pabian">Artikel: Pabian pesten</button><div class="mm-group-label">Hoorcollege 5</div><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc5">Verlies</button><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc5-ethiopie">Artikel: vluchtelingen Ethiopië</button><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc5-bonanno">Artikel: Bonanno partnerverlies</button><div class="mm-group-label">Hoorcollege 6</div><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc6">Omgaan met life events</button><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc6-rouw">Rouwmodellen</button><div class="mm-group-label">Overig</div><button type="button" class="filter-btn mm-nav-btn" data-mm-id="tools">Digitale tools</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section id="panel-guide" class="panel active guide-content">
+        <h1>Life Events — Gecondenseerde Studiegids</h1>
+<blockquote>
+<p>Volledige samenvatting van alle 6 hoorcolleges + digitale tools, per onderwerp.</p>
+</blockquote>
+<hr />
+<h2 id="inhoudstafel">Inhoudstafel</h2>
+<ol>
+<li><a href="#1-hoorcollege-1-inleiding">Hoorcollege 1: Inleiding</a></li>
+<li><a href="#2-hoorcollege-2-ouderschap">Hoorcollege 2: Ouderschap</a></li>
+<li><a href="#3-hoorcollege-3-relaties">Hoorcollege 3: Relaties</a></li>
+<li><a href="#4-hoorcollege-4-school--werk">Hoorcollege 4: School &amp; Werk</a></li>
+<li><a href="#5-hoorcollege-5-verlies">Hoorcollege 5: Verlies</a></li>
+<li><a href="#6-hoorcollege-6-omgaan-met-life-events">Hoorcollege 6: Omgaan met Life Events</a></li>
+<li><a href="#7-digitale-tools">Digitale Tools</a></li>
+</ol>
+<hr />
+<h2 id="1-hoorcollege-1-inleiding">1. Hoorcollege 1: Inleiding</h2>
+<h3>1.1 Wat zijn life events?</h3>
+<ul>
+<li>Ingrijpende, uitzonderlijke of betekenisvolle gebeurtenissen in iemands leven</li>
+<li>Potentieel destabiliserend; diepgaande invloed op functioneren en welzijn</li>
+<li><strong>Tools:</strong> SRSS (Social Readjustment Rating Scale), USQ (Undergraduate Stress Questionnaire), LEC-5</li>
+</ul>
+<h3>1.2 Benaderingen</h3>
+<table>
+<thead>
+<tr>
+<th>Benadering</th>
+<th>Kern</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Biopsychosociaal</strong></td>
+<td>Biologisch + psychologisch + sociaal</td>
+</tr>
+<tr>
+<td><strong>Levensloop</strong></td>
+<td>Zelfde gebeurtenis, andere leeftijd = andere impact; cumulatie van stress verzwaart</td>
+</tr>
+<tr>
+<td><strong>Existentieel</strong></td>
+<td>Schema's geven betekenis; life event past niet → nieuw betekenisproces (doel, coherentie, waarde)</td>
+</tr>
+<tr>
+<td><strong>Maatschappelijk</strong></td>
+<td>Individu ↔ microsysteem ↔ exosysteem ↔ macrosysteem</td>
+</tr>
+</tbody>
+</table>
+<h3>1.3 Impactfactoren (subjectief!)</h3>
+<ul>
+<li><strong>Levensgeschiedenis:</strong> referentiekader, verwachtingen, coping uit eerdere ervaringen</li>
+<li><strong>Persoonlijkheid:</strong> filter tussen gebeurtenis en reactie (doeners, gevoeligen, optimisten)</li>
+<li><strong>Hechtingsstijl</strong> (Bartholomew &amp; Horowitz): model van zelf × model van anderen → <strong>4 hechtingsstijlen</strong> (o.a. angstig: zoekt steun, intens; vermijdend: afstand, emoties onderdrukken)</li>
+<li><strong>Gezondheidstoestand:</strong> fysiek + mentaal + sociaal welbevinden (WHO); perceptie van gezondheid telt mee</li>
+</ul>
+<h3>1.4 Tools voor welbevinden</h3>
+<p><strong>Positieve gezondheid</strong> (6 domeinen): lichaamsfuncties, mentaal welbevinden, zingeving, kwaliteit van leven, meedoen, dagelijks functioneren → spinnenweb</p>
+<p><strong>PERMA (Seligman):</strong> Positive emotions, Engagement, Relationships, Meaning, Achievement → SWB (subjectief welbevinden)</p>
+<p><strong>SWB-theorieën:</strong><br />
+- Set-point theorie: SWB keert terug naar basisniveau<br />
+- Affectieve theorie: life events hebben langdurige impact<br />
+- Beide vullen elkaar aan<br />
+- Kanttekening: te veel positiviteit (euforie) kan nadelig zijn; negatieve emoties zijn soms functioneel<br />
+- Positieve gezondheid → spinnenweb toont <strong>sterktes én werkpunten</strong></p>
+<p><strong>Balkmetafoor:</strong> draaglast (stressoren) vs. draagkracht (coping, steun, energie) → kernidee kwetsbaarheid-stressmodel</p>
+<h3>1.5 Stress</h3>
+<p><strong>Definitie:</strong> druk wanneer eisen &gt; aanpassingsvermogen</p>
+<p><strong>Holmes &amp; Rahe (SRRS):</strong> Life Change Units, cumulatief effect. Beperkingen: geen subjectieve interpretatie, culturele verschillen, herinneringsbias</p>
+<p><strong>Lazarus (transactie):</strong> primaire beoordeling (bedreiging/schade/uitdaging?) + secundaire beoordeling (kan ik ermee omgaan?)</p>
+<p><strong>Soorten stressoren:</strong> catastrofes, levensgebeurtenissen, dagelijkse ergernissen</p>
+<p><strong>Werking stress:</strong> stressor (verandering, beheersbaarheid, voorspelbaarheid, ambiguïteit) → <strong>stressysteem</strong> (autonoom zenuwstelsel + <strong>HPA-as</strong>) → stressrespons</p>
+<p><strong>Typen stress:</strong><br />
+| Acuut | Chronisch |<br />
+|---|---|<br />
+| Kort, intens (rampen, examens) | Langdurig (werkstress) |<br />
+| Kan PTSS geven | Kan burn-out geven |</p>
+<p><strong>Eustress vs. distress:</strong> + eustress (positieve spanning) vs. − distress (negatieve spanning)</p>
+<p><strong>Burn-out (Maslach):</strong> emotionele uitputting, depersonalisatie, verminderde prestaties</p>
+<p><strong>Polyvagaal theorie (3 principes):</strong><br />
+1. <strong>Hiërarchie:</strong> ventraal vagale (veiligheid, verbinding) → sympathisch (fight/flight) → dorsaal vagale (freeze/fawn)<br />
+2. <strong>Neuroceptie:</strong> onbewuste scan op gevaar/veiligheid<br />
+3. <strong>Co-regulatie:</strong> de ander gebruiken om te kalmeren</p>
+<p><strong>Window of tolerance:</strong> hyperarousal ↔ window ↔ hypoarousal</p>
+<h3>1.6 Moderatoren</h3>
+<ul>
+<li><strong>Appraisals:</strong> primair (inschatting situatie) + secundair (hulpbronnen/coping)</li>
+<li><strong>Attributies:</strong> intern/extern, stabiel/instabiel, globaal/specifiek, controleerbaar/oncontroleerbaar</li>
+<li><strong>Locus of control:</strong> intern vs. extern (toeval, machtige anderen)</li>
+<li><strong>Veerkracht:</strong> aanpassingsvermogen na life event; kenmerken: gebalanceerdheid, zinvolheid, doorzettingsvermogen, zelfvertrouwen</li>
+<li><strong>Diabolomodel veerkracht:</strong> zelfzorg (basis) + zelfontplooiing + verbondenheid (centrale spil)</li>
+</ul>
+<h3>1.7 Stressweerbaarheidsmodel (kwetsbaarheid-stress / diathese-stress)</h3>
+<ul>
+<li>Psychische problemen = interactie kwetsbaarheid (diathese) + stress (life events)</li>
+<li>Oorsprong: Zubin &amp; Spring (schizofrenie)</li>
+<li><strong>Risicofactor ≠ kwetsbaarheid</strong> (risico verhoogt kans; kwetsbaarheid = onderliggend mechanisme)</li>
+<li><strong>Touwmetafoor:</strong> gewicht = stress; touw kan rekken of breken</li>
+<li><strong>Risico-veerkrachtmodel:</strong> hoge kwetsbaarheid + hoge stress = ernstiger pathologie</li>
+<li><strong>G × E × C model</strong> (Schiele): genetics × environment × coping</li>
+<li>Coping is trainbaar (stressmanagement, CGT, zelfmanagement)</li>
+<li>Veerkrachtfactoren o.a.: optimisme, altruïsme, goede copingvaardigheden, sterk sociaal netwerk</li>
+<li>Oudere modellen (ecologisch, genetisch, ontwikkelings-, neurofysiologisch, leermodellen) verklaarden slechts deel van pathologie → kwetsbaarheid als verbindende factor</li>
+</ul>
+<hr />
+<h2 id="2-hoorcollege-2-ouderschap">2. Hoorcollege 2: Ouderschap</h2>
+<h3>2.1 Zwangerschap</h3>
+<p><strong>Fysiek per trimester:</strong><br />
+- 1e: ochtendmisselijkheid, neurologische veranderingen (grijze stof ↓, witte stof ↑)<br />
+- 2e: zichtbare veranderingen<br />
+- 3e: ongemakken, slechtere slaap, verminderde mobiliteit</p>
+<p><strong>Mentaal:</strong> hormonen, identiteitsvragen, impact op partnerrelatie, werk, maatschappij</p>
+<p><strong>Periode rond bevalling:</strong> baby blues, postnatale depressie/angst, postpartum psychose, afscheid nemen van (het beeld van) een kind</p>
+<h3>2.2 Babyblues</h3>
+<ul>
+<li>50–80% vrouwen; <strong>geen aandoening</strong> maar hormonale aanpassing</li>
+<li>Daling progesteron/oestrogeen; piek dag 3–5; normaal weg na 6e week</li>
+<li>Symptomen: stemmingswisselingen, huilbuien, angst, vermoeidheid</li>
+</ul>
+<h3>2.3 Psychische problemen perinataal</h3>
+<ul>
+<li><strong>1/5 vrouwen</strong> heeft psychische problemen tijdens zwangerschap + 1e levensjaar</li>
+<li>Perinatale depressie: 7–15% (zwangerschap), 10% (postpartum); ook bij partners</li>
+<li>Angststoornis: ~13%; OCS: 2,1–2,4% (dwanggedachten beschermen kind, nesteldrang); PTSS: 3–9%; postpartum psychose: 1–2/1000 (75% ongediagnosticeerd, risico herhaling)</li>
+</ul>
+<h3>2.4 Artikel: verlies van een kind (veerkracht gezinnen)</h3>
+<p><strong>Klassieke rouwfases:</strong> verdoving → besef → acute rouw → herstelfase</p>
+<p><strong>Modern:</strong> relatie innerlijk reorganiseren, niet volledig loslaten</p>
+<p><strong>Gecompliceerde rouw:</strong> omstandigheden overlijden, leeftijd kind, suïcide, impact op siblings</p>
+<p><strong>Resiliency Model of Family Stress:</strong> beschermende factoren (open communicatie, steun, rituelen) vs. herstelfactoren (hoop, spiritualiteit, betekenisgeving)</p>
+<p><strong>Onderzoek (89 Belgische gezinnen, 3–6 jaar na verlies):</strong><br />
+- 72% noemt communicatie als belangrijkste hulpbron<br />
+- Crisis als uitdaging (niet ontkennen) → betere aanpassing<br />
+- Formele + informele steun; lotgenotencontact<br />
+- Ouders: herdefiniëren; siblings: religieuze/spirituele steun</p>
+<h3>2.5 Groeiende veerkracht perinataal</h3>
+<ul>
+<li><strong>Perinataal/peripartum:</strong> van verlangen zwanger te worden tot 1 jaar na bevalling</li>
+<li><strong>Matrescentie/patrescentie:</strong> transitie vergelijkbaar met adolescentie</li>
+<li>3 onderdelen transitie: beeldvorming &amp; verwachtingen, aanpassingsvermogen, engagement</li>
+<li>Protectieve factoren: prenatale screening, kraamzorg, kangoeroezorg, borstvoeding</li>
+</ul>
+<h3>2.6 Eerste 1000 dagen (bevruchting → 2e verjaardag)</h3>
+<ul>
+<li>Snelle orgaan-/hersenontwikkeling; extra kwetsbaar</li>
+<li>Invloed op: lichamelijke gezondheid, cognitie, sociaal-emotioneel, school, werk</li>
+<li>Risico's: stress, roken, drugs, geweld, verwaarlozing, armoede</li>
+<li>SES: premature geboorte, laag geboortegewicht, overgewicht</li>
+<li><strong>Heckman:</strong> investering vroeg &gt; investering later</li>
+<li><strong>Agentschap Opgroeien:</strong> Kind en Gezin, Groeipakket; onderscheid eerste 1000 dagen vs. <strong>IMH</strong> (Infant Mental Health, tot 5 jaar)</li>
+<li><strong>PIMH:</strong> perinatale mentale gezondheid ouders + kind</li>
+</ul>
+<h3>2.7 Artikel: gezinsstress &amp; sociaal-emotionele gezondheid kinderen (Amsterdam, 4406 tieners)</h3>
+<ul>
+<li>SDQ gemeten; 17% gezinnen met stress; 15,1% kinderen verhoogd risico</li>
+<li>Met stress: 31% problemen vs. zonder: 11,5% → <strong>RR = 2,63</strong></li>
+<li>Opvoedstress = sterkste impact; cumulatief effect</li>
+<li>Vicieuze cirkel: ouderstress → kindproblemen → meer ouderstress</li>
+<li>
+<p>JGZ: systematisch bevragen, vroeg ondersteunen</p>
+</li>
+<li>
+<p>Spiritualiteit: geloof, kerkgang, graf bezoeken, muziek, natuur, rituelen</p>
+</li>
+</ul>
+<h3>2.8 Familiereflex (GGZ)</h3>
+<ul>
+<li>Familie als gelijkwaardige partner in triade: zorggebruiker – familie – hulpverlener</li>
+<li>Gebaseerd op richtlijn <strong>Steunpunt</strong> Welzijn, Volksgezondheid en Gezin</li>
+<li><strong>Hulpverleners:</strong> familie onthalen, informeren, ondersteunen, kinderen betrekken, samenwerken tijdens traject; ook bij crisis, suïcide, opname, doorverwijzing/afronding</li>
+<li><strong>Organisaties:</strong> familiebeleid, familievriendelijke infrastructuur, opleiding, evaluatie, praktische hulpmiddelen</li>
+<li>Beperkingen: focus residentiële zorg, algemene aanbevelingen, weinig innovatie, beperkte aandacht school/werk/buurt</li>
+<li>Implementatie vraagt: shared decision-making, stappenplannen, opleidingen, websites, coaching, tijd en middelen</li>
+</ul>
+<h3>2.9 Grootouder worden</h3>
+<ul>
+<li>Combinatie rollen: werk, mantelzorg, opvang kleinkinderen</li>
+<li>Meeste grootouders: wekelijks contact; 1/5 wil vaker; minder contact → vaker wens voor méér contact</li>
+<li>Opvang: gepensioneerden helpen structureler; "back-up" bij ziekte/crèche-sluiting</li>
+<li>Afspraken over opvang, oppasdagen, noodsituaties, taakverdeling tussen grootouderparen</li>
+<li>Evenwicht: betrokken zijn vs. vrijheid; overbevraging (werk + mantelzorg + opvang)</li>
+<li>Genieten omdat: minder opvoedingsverantwoordelijkheid, meer kwaliteitstijd</li>
+<li>Maatschappelijke druk: tussen generaties in; opvoeden vandaag moeilijker (werk-gezin, opvang)</li>
+</ul>
+<h3>2.10 Pleegzorg &amp; adoptie</h3>
+<p><strong>Pleegzorg:</strong> 40% aanvragen vindt plaats; ondersteunende pleegzorg; <strong>crisispleegzorg</strong> (binnen 48u, 7/7); perspectief-biedende pleegzorg; pleegzorg volwassenen; <strong>Geef de wereld een (t)huis</strong></p>
+<table>
+<thead>
+<tr>
+<th>Risicofactoren</th>
+<th>Beschermende factoren</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Uitstel beslissing terugplaatsing</td>
+<td>Snelle, stabiele plaatsing</td>
+</tr>
+<tr>
+<td>Voortijdige beëindiging/overplaatsing</td>
+<td>Ouders accepteren plaatsing</td>
+</tr>
+<tr>
+<td>Conflicten ouders/pleegouders</td>
+<td>Goede samenwerking</td>
+</tr>
+<tr>
+<td>Negatieve opvoedstrategieën, mishandeling</td>
+<td>Autoritatieve stijl, grenzen, steun</td>
+</tr>
+<tr>
+<td>Onveilige hechting</td>
+<td>Veilige hechting, veiligheid in gezin</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Adoptie gekend kind:</strong> zonder erkende adoptiedienst; voorwaarden: gehuwd/wettelijk samenwonend/min. 3j feitelijk samenwonend of alleenstaand; min. 25j en min. 15j ouder dan kind; programma + geschiktheidsverklaring familierechter</p>
+<p><strong>Adoptie ongekend kind:</strong> kind toegewezen door adoptiedienst</p>
+<p><strong>Adoptie:</strong> gekend kind vs. ongekend kind; interlandelijke adoptie Vlaanderen <strong>definitief stop tegen 2027</strong> (uitdoofscenario; alleen dossiers met concrete match)</p>
+<h3>2.11 Scheiding</h3>
+<p><strong>Risico's:</strong> huiselijk geweld, ouderlijke conflicten, psychologische oorlogsvoering, financiële problemen, slechte band met in-/uitwonende ouder</p>
+<p><strong>Beschermend:</strong> humor, genegenheid, goede band met beide ouders, regelmatig contact</p>
+<p><strong>Kinderen nodig hebben:</strong> uitleg, ruimte om te voelen/praten, tijd om te rouwen, conflicten opgelost, gezien worden in krachten</p>
+<p><strong>Ouders nodig hebben:</strong> info/klankbord, niet-veroordelende luisteraar, aandacht voor eigen verdriet</p>
+<hr />
+<h2 id="3-hoorcollege-3-relaties">3. Hoorcollege 3: Relaties</h2>
+<h3>3.1 Vriendschappen</h3>
+<ul>
+<li>Vrijwillig maar niet vrijblijvend; centraal: vertrouwen, zelfonthulling, steun</li>
+<li><strong>Levensloop:</strong> kleuters (spelen, wisselend) → lagere school (vertrouwen, gelijkaardige vrienden qua leeftijd/geslacht/etniciteit) → adolescentie (4–6 beste vrienden, intimiteit, loyaliteit, co-ruminatie) → volwassenheid (selectiever) → 65+ (oude vriendschappen, nabijheid)</li>
+<li><strong>Artikel adolescentievriendschappen:</strong> hechte vriendschappen, <strong>sociale acceptatie &amp; populariteit/likeability</strong> → welzijn later</li>
+<li>Vroege adolescentie → sociale acceptatie voorspelt later welzijn; late adolescentie → hechte vriendschappen</li>
+<li>70% vriendschapsnetwerken vernieuwt elke 7 jaar (Utrecht); functie verandert (hartsvriend → uitgaansvriend)</li>
+</ul>
+<h3>3.2 Siblings</h3>
+<ul>
+<li>Langstdurende relatie; ambivalent (warmte + conflict): vriend/steunfiguur én bron van stress</li>
+<li>Positief: bondgenoot, vertrouwenspersoon; negatief: jaloezie, ruzie, agressie</li>
+<li>Siblinggeweld: vooral tot ~10 jaar; meer bij lagere SES; biologische siblings warmer maar meer conflict; stief-/halfsiblings minder warmte</li>
+<li><strong>JOP-monitor 2023:</strong> 5463 jongeren, 3795 met sibling; ~1/5 maandelijks/wekelijks conflict; ~5% dagelijks agressie</li>
+</ul>
+<h3>3.3 Partnerrelaties</h3>
+<ul>
+<li>Monogaam, polygamie, polyamorie</li>
+<li><strong>Triangulatietheorie Sternberg:</strong> drie componenten (intimiteit, passie, toewijding) → verschillende liefdesvormen</li>
+</ul>
+<p><img alt="Triangulatietheorie van Sternberg" src="images/sternberg-triangulatie.png" /></p>
+<table>
+<thead>
+<tr>
+<th>Positie</th>
+<th>Type liefde</th>
+<th>Componenten</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hoek intimiteit</td>
+<td>Iemand leuk vinden</td>
+<td>Alleen intimiteit</td>
+</tr>
+<tr>
+<td>Hoek passie</td>
+<td>Bevlieging</td>
+<td>Alleen passie</td>
+</tr>
+<tr>
+<td>Hoek toewijding</td>
+<td>Lege liefde</td>
+<td>Alleen toewijding</td>
+</tr>
+<tr>
+<td>Zijde links</td>
+<td>Romantische liefde</td>
+<td>Intimiteit + passie</td>
+</tr>
+<tr>
+<td>Zijde rechts</td>
+<td>Sociale liefde / gezelschap</td>
+<td>Intimiteit + toewijding</td>
+</tr>
+<tr>
+<td>Zijde onder</td>
+<td>Dwaze liefde</td>
+<td>Passie + toewijding</td>
+</tr>
+<tr>
+<td>Midden</td>
+<td>Volmaakte liefde</td>
+<td>Intimiteit + passie + toewijding</td>
+</tr>
+</tbody>
+</table>
+<h3>3.4 Discriminatie, racisme, seksisme</h3>
+<p><strong>Discriminatie:</strong> ongerechtvaardigd onderscheid op beschermd criterium; oorzaken: socialisatie, ervaring, representatie</p>
+<p><strong>Racisme:</strong> systeem van dominantie en privileges; antiracismewet; micro-agressies</p>
+<p><strong>Seksisme:</strong> = gedrag waarbij iemand of een groep gediscrimineerd wordt obv geslacht</p>
+<p><img alt="Seksisme — ijsbergmodel" src="images/seksisme-ijsberg.png" /></p>
+<p><strong>Kernboodschap:</strong> <em>Geweld begint soms met een grap.</em> Individuele seksistische handelingen lijken misschien onschuldig, maar ze creëren een klimaat van intimidatie, angst en onveiligheid. Dit leidt tot acceptatie van geweld, vooral tegen vrouwen en meisjes.</p>
+<p><strong>Ijsberg — boven water (zichtbaar/extreem):</strong> moord, verkrachting en seksueel geweld, stalking, fysiek en psychologisch geweld, (seksuele) intimidatie, beledigingen, controle</p>
+<p><strong>Ijsberg — onder water (genormaliseerd):</strong> bedreigingen, beschaamd maken, seksualisering van vrouwen, uitsluiten en onzichtbaar maken, onderwaardering, strikte rollen voor vrouwen en mannen, geweld op vrouwen oogluikend toestaan, commentaar op het uiterlijk, seksistische taal en moppen</p>
+<h3>3.5 Gender &amp; transgender (artikel)</h3>
+<ul>
+<li>Gender = culturele normen rond mannelijkheid/vrouwelijkheid; transgender zijn ≠ psychische aandoening</li>
+<li>Mentale problemen door <strong>minority stress</strong> (discriminatie, stigma, afwijzing)</li>
+<li>Beschermend: pride, community, zelfacceptatie, steunnetwerk, rolmodellen, safe spaces, mindfulness</li>
+<li>Genderbevestigende zorg verbetert mentale gezondheid</li>
+<li><strong>Genderaffirmatieve benadering:</strong> respect, autonomie, geen gatekeeping</li>
+<li>Consent: angst/depressie ≠ automatisch uitstel; wel bij psychose die begrip verhindert</li>
+<li>Perioperatief: afspraken, wondzorg; roken verhoogt complicaties (necrose, infecties)</li>
+<li>Hormonen behouden bij opname; correcte naam/voornaamwoorden</li>
+<li>Psychotherapie niet verplicht; conversietherapie afwijzen</li>
+</ul>
+<h3>3.6 In-group vs. out-group</h3>
+<ul>
+<li>Out-group homogeniteit; contrast vs. assimilatie</li>
+<li><strong>Centrale vs. perifere route</strong> bij out-group</li>
+<li><strong>Jane Elliott:</strong> blue eyes/brown eyes → vooroordelen en empathie</li>
+<li><strong>Minimale groepssituatie:</strong> in-group favoritisme</li>
+<li><strong>IAT:</strong> bewuste vs. onbewuste attitudes (Gladwell); maatschappelijke beïnvloeding van associaties</li>
+</ul>
+<h3>3.7 Inclusieve zorg (artikel, 19 professionals)</h3>
+<ul>
+<li>Kwalitatief verkennend; semigestructureerde interviews (Teams); <strong>sneeuwbalmethode</strong>; <strong>thematische analyse</strong> tot saturatie</li>
+<li>Jongeren met migratieachtergrond: meer discriminatie, minder formele hulp</li>
+<li><strong>Stagediscriminatie</strong>, microagressies, prestatiedruk</li>
+<li>Cultuursensitieve zorg: herkenning, vertrouwen, empathie, "eerlijke diagnostiek"</li>
+<li>Professionals mét migratieachtergrond: sneller herkenning discriminatie</li>
+<li>School = belangrijke plek vroegdetectie</li>
+</ul>
+<hr />
+<h2 id="4-hoorcollege-4-school-and-werk">4. Hoorcollege 4: School &amp; Werk</h2>
+<h3>4.1 Transitie kleuterschool (artikel ECLS-K:2011, 13.390 kinderen)</h3>
+<ul>
+<li>Overgangsproblemen (huilen, angst, schoolweigering) voorspellen problemen tot 5e leerjaar</li>
+<li><strong>Mediatiemodel:</strong> ondersteuning → minder problemen → betere ontwikkeling; <strong>moderatiemodel:</strong> ondersteuning als buffer</li>
+<li>Analyse: padanalyse, <strong>latent class analysis (LCA)</strong></li>
+<li>3 schooltypes: minimal (29%), high basic (63%), intensive (9%)</li>
+<li><strong>High basic supports</strong> (info ouders + klasbezoeken) = meest effectief; kinderen deden het beter academisch</li>
+<li>Intensive supports ≠ beter; geen buffering bij bestaande problemen</li>
+<li>Preventief, niet curatief; eenvoudige maatregelen (communicatie + klasbezoek) volstaan vaak</li>
+</ul>
+<h3>4.2 Lagere school &amp; middelbaar</h3>
+<ul>
+<li>Meer structuur: vaste lestijden, stilzitten, huiswerk, evaluaties, minder vrij spel</li>
+<li>Kinderen: langer concentreren, zelfredzaam, agenda beheren</li>
+<li>Context thuissituatie, ouder-kindrelatie altijd meenemen; goed geïnformeerde ouders → vlottere overgang</li>
+<li>Middelbaar: grotere school, moeilijkere stof, zelfstandig plannen, schoolkeuzestress (inschrijvingsbeperkingen Vlaamse steden)</li>
+</ul>
+<h3>4.3 Hoger onderwijs / op kot (Transitions-programma)</h3>
+<ul>
+<li>Eenzaamheid, heimwee, stress; meer zelfredzaamheid; identiteitsontwikkeling</li>
+<li><strong>Transitions:</strong> mental health literacy + life skills; quasi-experimenteel, 2397 studenten, 5 Canadese instellingen</li>
+<li>Onderwerpen: studievaardigheden, stress, seksualiteit, campusondersteuning, hulp zoeken</li>
+<li>Resultaat: meer kennis, minder stigma, minder stress, <strong>2,75× vaker hulp zoeken</strong></li>
+<li>Beperkingen: geen volledige randomisatie, uitval, weinig diverse populatie</li>
+<li>Flexibel (workshops, online); nuttig in Vlaanderen maar vraagt tijd, begeleiding, financiering</li>
+</ul>
+<h3>4.4 Pesten</h3>
+<ul>
+<li>Langetermijnimpact (<strong>National Child Development Study</strong>, UK vanaf 1958: effecten op 50e)</li>
+<li>Definitie: intentioneel, herhaald, machtsonevenwicht</li>
+<li>Cyberpesten: anoniem, altijd zichtbaar, overal mogelijk</li>
+<li>Gevolgen: lager zelfbeeld, sociale angst, minder levenstevredenheid</li>
+<li><strong>Pabian et al.:</strong> ervaren impact belangrijker dan objectieve ernst; PTG mogelijk</li>
+<li>Vlaamse + Nederlandse steekproef (1010 + 650 jongvolwassenen)</li>
+</ul>
+<h3>4.5 Job, ontslag, werkloosheid</h3>
+<ul>
+<li>Jobwissel: onzekerheid maar ook groei; positief als inhoud past</li>
+<li>Ontslag: verlies inkomen, identiteit, structuur, sociale contacten; kan ook opluchting zijn</li>
+<li>Werkloosheid: welbevinden herstelt soms tot 3 jaar; afschrikeffect</li>
+<li>Impact hangt af van inschatting kansen op nieuw werk</li>
+</ul>
+<h3>4.6 Burn-out (Maslach &amp; Leiter)</h3>
+<p><strong>3 dimensies:</strong> emotionele uitputting, cynisme/depersonalisatie, verminderde persoonlijke bekwaamheid</p>
+<p><strong>Ontwikkeling:</strong> start vaak als geëngageerde werknemer → overbelasting → uitputting</p>
+<p><strong>6 mismatch-domeinen:</strong> workload, control, reward, community, fairness, values</p>
+<p><strong>Gevolgen:</strong> psychisch (depressie, angst), lichamelijk (slaap, immuunsysteem), werk (absenteïsme), sociaal</p>
+<p><strong>Individueel:</strong> perfectionisme, neuroticisme, lage zelfwaardering, externe locus of control</p>
+<p><strong>Engagement</strong> = positief tegenovergestelde (energie, betrokkenheid, voldoening)</p>
+<hr />
+<h2 id="5-hoorcollege-5-verlies">5. Hoorcollege 5: Verlies</h2>
+<h3>5.1 Verlies van een thuis</h3>
+<ul>
+<li>Verhuizen = afscheid van herinneringen en hoofdstuk in het leven</li>
+</ul>
+<h3>5.2 Vrijwillige migratie</h3>
+<ul>
+<li>Uitdagingen: cultuurshock, taalbarrière, bureaucratie (visum, verzekering), heimwee</li>
+<li>Positief: groei, autonomie, nieuwe contacten</li>
+<li><strong>EHERO:</strong> migranten ~0,5 punt gelukkiger (schaal 0–10), vooral eerste 5 jaar</li>
+</ul>
+<h3>5.3 Onvrijwillige migratie (artikel Ethiopië)</h3>
+<p><strong>Bronnen veerkracht:</strong> sociale steun, werk, onderwijs, religie, gemeenschapsbetrokkenheid</p>
+<p><strong>Opiniestuk "Van energie naar kracht":</strong> energie → frustratie bij gebrek aan kansen; kleinschalige opvang, taal als middel (perfect taalgebruik kan uitsluiten), werk voor integratie</p>
+<h3>5.4 Verhuis naar WZC</h3>
+<ul>
+<li>38% 60-plussers negatief beeld; "laatste halte"; thuiszorg, mantelzorg, trapliften, alarmknoppen</li>
+<li>Verlies: spullen, autonomie, privacy (vaste maaltijden, gedeelde ruimtes); desoriëntatie bij dementie</li>
+<li>Onbegrepen gedrag: weglopen, roepen, agressie</li>
+<li>Familie: schuldgevoel, conflict; culturele verschillen (90% niet-Belgen: zorg voor ouders = morele plicht)</li>
+<li>Individuele + interactionele veerkracht</li>
+</ul>
+<h3>5.5 Ouder worden</h3>
+<ul>
+<li>Lichamelijke beperkingen, pensionering (structuur/identiteit verlies), lege nest, overlijden geliefden</li>
+<li>Rouw: ontkenning, verdriet, schuld, angst, eenzaamheid; herhaald verlies op oudere leeftijd</li>
+</ul>
+<h3>5.6 Palliatieve zorg</h3>
+<ul>
+<li>Kwaliteit van leven bij levensbedreigende ziekte; dood niet bespoedigen/uitstellen</li>
+<li>Psychosociale behoeften: begrip, acceptatie, zelfrespect, veiligheid/geborgenheid, erbij horen, liefde/aanraking, spiritualiteit, hoop</li>
+<li><strong>Distress, demoralisatie, angst, depressie</strong> — depressie ≠ normaal onderdeel sterven</li>
+<li>Behandeling: gesprekken, ACT, mindfulness; <strong>levensverhaal</strong>, muziek-/aromatherapie; antidepressiva; kortdurend <strong>benzodiazepines</strong> bij angst</li>
+<li>Barrières herkenning: schaamte patiënt, onvoldoende opleiding hulpverlener; gouden standaard = klinisch gesprek</li>
+</ul>
+<h3>5.7 Afscheid &amp; verlies dierbare</h3>
+<p><strong>Levenseinde:</strong><br />
+- A: geen zinloze behandeling starten/voortzetten (therapeutische hardnekkigheid vermijden)<br />
+- B: pijnstilling, <strong>palliatieve sedatie</strong> (= verlichten stervenproces)<br />
+- C: euthanasie — wilsbekwaam (meerderjarig of <strong>wilsbekwame minderjarige</strong> + toestemming vertegenwoordigers), ondraaglijk lijden, medisch uitzichtloos, schriftelijk verzoek; terminale vs. niet-terminale (2de/3de arts); voorafgaande wilsverklaring alleen bij onomkeerbaar coma<br />
+- D: levenseinde zonder wettelijk kader</p>
+<p><strong>Artikel Bonanno et al. (partnerverlies, 205 deelnemers, prospectief):</strong><br />
+| Patroon | % | Kenmerk |<br />
+|---|---|---|<br />
+| <strong>Resilience</strong> | ~46% | Meest voorkomend; stabiel functioneren |<br />
+| Common grief | | Minder vaak dan gedacht |<br />
+| Chronic grief | | Sterke afhankelijkheid partner |<br />
+| Chronic depression | | Al depressief vóór overlijden |<br />
+| Depressed-improved | | Zorg was belastend |<br />
+| Delayed grief | | Amper gevonden |</p>
+<ul>
+<li>Weinig zichtbare rouw ≠ koud/ongehecht</li>
+<li>Preloss-factoren cruciaal</li>
+</ul>
+<hr />
+<h2 id="6-hoorcollege-6-omgaan-met-life-events">6. Hoorcollege 6: Omgaan met Life Events</h2>
+<h3>6.1 AREA-model (Wilson &amp; Gilbert)</h3>
+<p><strong>Attent → React → Explain → Adapt</strong></p>
+<p>Betekenisgeving = cruciaal. Factoren: nieuwheid, variatie, onverwachtheid, zekerheid, verklarende coherentie, persoonlijke attributie</p>
+<h3>6.2 Transactionele theorie (Lazarus)</h3>
+<p><strong>Primair:</strong> schade/verlies, bedreiging, uitdaging</p>
+<p><strong>Secundair:</strong> interne (zelfvertrouwen) + externe (steun) hulpbronnen</p>
+<p><strong>Smith &amp; Lazarus:</strong> motivationele relevantie, congruentie, verantwoordelijkheid, copingmogelijkheden, toekomstverwachting → emoties</p>
+<p><strong>Voorbeelden primaire beoordeling:</strong> schade (ontslag), bedreiging (examen), uitdaging (nieuwe job)</p>
+<p><strong>Stressvolle gebeurtenissen:</strong> op handen, onverwacht, onvoorspelbaar, onduidelijk, ongewenst, niet controleerbaar, grote levensverandering</p>
+<p><strong>Kritiek:</strong> cirkelredenering, stress ook bij voldoende hulpbronnen; negatieve zelfattributies bemoeilijken verwerking</p>
+<h3>6.3 Sense of Coherence (Antonovsky)</h3>
+<ol>
+<li><strong>Comprehensibility</strong> (begrijpelijkheid)</li>
+<li><strong>Manageability</strong> (hanteerbaarheid)</li>
+<li><strong>Meaningfulness</strong> (betekenisvolheid)</li>
+</ol>
+<h3>6.4 Palliatief palet (Portzky)</h3>
+<ul>
+<li>Palliatieve activiteit: tijdelijk onderbreken negatieve gevoelens</li>
+<li>Continuüm: positief (sport, hobby) → minder gunstig (dwangmatig) → destructief (alcohol, automutilatie, suïcide)</li>
+<li><strong>UCL</strong> (Utrechtse Coping Lijst): subschaal palliatief reactiepatroon — mengt positief en destructief</li>
+<li><strong>P3-schaal:</strong> onderscheid positief/destructief</li>
+<li>Gezond profiel: veel positief, weinig destructief; curve vlak naar einde</li>
+<li><strong>Borderline:</strong> wisselend patroon — positief bij goed, snel destructief bij verslechtering</li>
+<li>Presenteïsme verhoogt burn-outrisico</li>
+<li>Rouw: ontspanning mag naast verdriet; sociale vs. emotionele eenzaamheid</li>
+</ul>
+<h3>6.5 Coping (Lazarus &amp; Folkman)</h3>
+<table>
+<thead>
+<tr>
+<th>Stijl</th>
+<th>Doel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Probleemgericht</td>
+<td>Stressor aanpakken</td>
+</tr>
+<tr>
+<td>Emotiegericht</td>
+<td>Emoties reguleren</td>
+</tr>
+<tr>
+<td>Controlegericht</td>
+<td>Controle krijgen</td>
+</tr>
+<tr>
+<td>Vermijdend</td>
+<td>Ontsnappen</td>
+</tr>
+<tr>
+<td>Betekenisgericht</td>
+<td>Groei, PTG, nieuwe doelen</td>
+</tr>
+</tbody>
+</table>
+<p><strong>5 functies (Cohen &amp; Lazarus):</strong> schade verminderen, aanpassen, zelfbeeld behouden, emotioneel evenwicht, relaties behouden</p>
+<h3>6.6 Rouw — modellen</h3>
+<p><strong>Kübler-Ross (5 fasen):</strong> ontkenning → protest/woede → onderhandelen → verdriet → aanvaarding<br />
+- Kritiek: niet lineair, niet voor iedereen; rouwen is iets wat je leert</p>
+<p><strong>Worden (4 taken):</strong> erkennen, pijn ervaren, aanpassen (nieuwe routines), verbinden (herinneringen bewaren)</p>
+<p><strong>Dual Process Model (Stroebe &amp; Schut):</strong> verliesgerichte ↔ herstelgerichte coping (slingerbeweging); "één been in verlies, één in wereld die doordraait"</p>
+<p><strong>IPM (Guldin &amp; Leget):</strong> 5 dimensies — fysiek, emotioneel, cognitief, sociaal, spiritueel; existentiële spanningen (leven/dood, controle/machteloosheid)</p>
+<h3>6.7 Betekenisgeving (Crystal Park)</h3>
+<ul>
+<li><strong>Global meaning</strong> vs. <strong>situational meaning</strong></li>
+<li>Stress = discrepantie tussen beide</li>
+<li>Coping via: spiritualiteit, rituelen, tradities, kunst/creativiteit</li>
+</ul>
+<h3>6.8 Sociale steun</h3>
+<ul>
+<li><strong>Materieel:</strong> praktische/financiële hulp</li>
+<li><strong>Informatief:</strong> advies, informatie</li>
+<li><strong>Emotioneel:</strong> luisteren, begrip, troost</li>
+</ul>
+<h3>6.9 Herstel (GGZ)</h3>
+<ul>
+<li>≠ genezing; leven met kwetsbaarheid; persoon is expert</li>
+<li><strong>Verschil veerkracht:</strong> veerkracht = terugveren; herstel = veranderd blijven (knoop in touw)</li>
+<li><strong>Anthony (1993):</strong> hoop, controle, betekenisvolle participatie</li>
+<li><strong>4 fasen:</strong> overweldigd → worstelen → leven met → leven voorbij</li>
+<li><strong>CHIME</strong> (<strong>Leamy</strong> et al., 2011): Connectedness, Hope, Identity, Meaning, Empowerment</li>
+<li><strong>Thomas meta-analyse (2018):</strong> persoonsgericht herstel → meer herstel, hoop, empowerment; combinatie met ervaringsdeskundigen effectief</li>
+<li><strong>Empowerment + ervaringsdeskundigheid</strong></li>
+</ul>
+<h3>6.10 Posttraumatische groei (PTG)</h3>
+<ul>
+<li>Positieve verandering na trauma; trauma zelf is niet positief</li>
+<li><strong>5 domeinen:</strong> relaties, nieuwe mogelijkheden, persoonlijke kracht, spiritualiteit, waardering leven</li>
+<li>PTG ≠ veerkracht (PTG = hoger niveau dan vóór)</li>
+</ul>
+<hr />
+<h2 id="7-digitale-tools">7. Digitale Tools</h2>
+<h3>Ouderschap</h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Doel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>perinatalehulp.be/zelfhulp</td>
+<td>Depressie na zwangerschap; traject ~10 weken; iemand uit omgeving betrekken</td>
+</tr>
+<tr>
+<td>kinderwens.org/vanrozenaarbrozewolk</td>
+<td>Veerkracht jonge ouders (<strong>1001 dagen</strong>)</td>
+</tr>
+<tr>
+<td>wolkinmijnhoofd.be</td>
+<td>Mentale gezondheid zwangerschap–1 jaar postpartum</td>
+</tr>
+<tr>
+<td>vaderen.be</td>
+<td>Vaderschap 0–8 jaar</td>
+</tr>
+<tr>
+<td>Keep in Touch Kit (app)</td>
+<td>Gescheiden gezinnen; kalender, checklists, chatroom</td>
+</tr>
+<tr>
+<td>scheidingskoffer.be</td>
+<td>Scheiding; reflectievragen, tips, liedjes</td>
+</tr>
+<tr>
+<td>steunpuntadoptie.webinargeek.com</td>
+<td>Adoptie webinars</td>
+</tr>
+<tr>
+<td>a-buddy.be</td>
+<td>Lotgenoten geadopteerden</td>
+</tr>
+<tr>
+<td>zojong.be</td>
+<td>Mantelzorgers</td>
+</tr>
+<tr>
+<td>druglijn.be/grip</td>
+<td>KOPP-kinderen</td>
+</tr>
+</tbody>
+</table>
+<h3>Relaties</h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Doel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>vragenlijsten.mijnpositievegezondheid.nl</td>
+<td>Positieve gezondheid spinnenweb (6 domeinen)</td>
+</tr>
+<tr>
+<td>samenveerkrachtig.be</td>
+<td>GGZ-veerkracht (oktober + het hele jaar)</td>
+</tr>
+<tr>
+<td>reacttoracism.be</td>
+<td>Racisme &amp; veerkracht</td>
+</tr>
+<tr>
+<td>kennispleingehandicaptensector.nl</td>
+<td>Handicap &amp; veerkracht</td>
+</tr>
+<tr>
+<td>noknok.be</td>
+<td>Jongeren 12–16 jaar</td>
+</tr>
+</tbody>
+</table>
+<h3>School &amp; Werk</h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Doel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>moodspace.be</td>
+<td>Studentenwelzijn; <strong>aanrader examenperiode</strong></td>
+</tr>
+<tr>
+<td>allesoverpesten.be</td>
+<td>Pesten</td>
+</tr>
+<tr>
+<td>pimento.be</td>
+<td>Hulpverleners + pesten</td>
+</tr>
+<tr>
+<td>vrt.be/edubox</td>
+<td>Online pesten</td>
+</tr>
+<tr>
+<td>tegek.be</td>
+<td>Burn-out psycho-educatie</td>
+</tr>
+<tr>
+<td>geluksdriehoek.be</td>
+<td>Geluk (zijn, voelen, omringd)</td>
+</tr>
+</tbody>
+</table>
+<h3>Verlies</h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Doel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>waarblijftmijntijd.mantelzorg.nl</td>
+<td>Mantelzorgtijd</td>
+</tr>
+<tr>
+<td>mijnherinneringaanjou.be</td>
+<td>Digitale herinneringen overledene</td>
+</tr>
+<tr>
+<td>missingyou.be</td>
+<td>Rouw jongeren/jongvolwassenen</td>
+</tr>
+<tr>
+<td>onlinehulp-apps.be/rouwkost</td>
+<td>Rouw psycho-educatie; normale rouw of aanvulling op begeleiding</td>
+</tr>
+<tr>
+<td>bovendewolken.be</td>
+<td>Foto's sterrenkinderen</td>
+</tr>
+</tbody>
+</table>
+<hr />
+      </section>
+
+      <section id="panel-flashcards" class="panel">
+        <div class="fc-toolbar">
+          <button class="primary" id="btn-shuffle">Shuffle wachtrij</button>
+          <button id="btn-reset-progress">Reset voortgang</button>
+          <button id="btn-show-list">Toon alle kaarten</button>
+          <button id="btn-edit-current">Bewerk huidige kaart</button>
+        </div>
+        <div class="fc-progress">
+          <span id="fc-stats">0 / 0 beheerst</span>
+          <div class="fc-progress-bar"><div class="fc-progress-fill" id="fc-progress-fill"></div></div>
+        </div>
+        <div class="fc-session-stats" id="fc-session-stats"></div>
+        <div class="fc-stage" id="fc-stage">
+          <div class="fc-stage-toolbar">
+            <button type="button" id="btn-fc-fullscreen" title="Groot scherm (Esc om te sluiten)">⛶ Groot scherm</button>
+          </div>
+          <div class="flashcard-wrap" id="fc-wrap">
+            <div class="flashcard" id="flashcard" aria-live="polite">
+              <div class="fc-face fc-front">
+                <div class="fc-section" id="fc-section"></div>
+                <div class="fc-question" id="fc-question"></div>
+                <div class="fc-status-badge" id="fc-status-badge"></div>
+              </div>
+              <div class="fc-face fc-back">
+                <div class="fc-section" id="fc-section-back"></div>
+                <div class="fc-answer" id="fc-answer"></div>
+                <div class="fc-status-badge confirm" id="fc-status-badge-back"></div>
+              </div>
+            </div>
+          </div>
+          <p class="fc-hint">
+            Klik of <kbd>Spatie</kbd> = omdraaien ·
+            <kbd>←</kbd> <kbd>→</kbd> = vorige/volgende ·
+            <kbd>Enter</kbd> = ken ik (2× = echt beheerst) ·
+            <kbd>Backspace</kbd> = ken ik niet
+          </p>
+          <div class="fc-actions">
+            <button class="unknown" id="btn-hard">Ken ik niet (Backspace)</button>
+            <button id="btn-prev">← Vorige</button>
+            <button id="btn-next">Volgende →</button>
+            <button class="known" id="btn-easy">Ken ik (Enter)</button>
+          </div>
+        </div>
+        <div class="fc-weak-panel" id="fc-weak-panel">
+          <h3>Meer aandacht nodig</h3>
+          <p>Kaarten die je minstens 2× als &ldquo;ken ik niet&rdquo; hebt gemarkeerd. Oefen deze extra.</p>
+          <div class="fc-weak-list" id="fc-weak-list"></div>
+          <button type="button" class="primary" id="btn-study-weak" style="display:none">Oefen alleen zwakke kaarten</button>
+          <button type="button" id="btn-study-all" style="display:none">Terug naar alle kaarten</button>
+        </div>
+        <div class="fc-list" id="fc-list" style="display:none"></div>
+      </section>
+
+      <section id="panel-editor" class="panel">
+        <p class="editor-intro">
+          Pas vragen en antwoorden hier direct aan. Wijzigingen worden automatisch opgeslagen in je browser.
+          Gebruik <strong>Exporteer backup</strong> om een kopie te bewaren, of <strong>Herstel origineel</strong> om terug te gaan naar de standaardkaarten.
+        </p>
+        <div class="editor-toolbar">
+          <button class="primary" id="btn-new-card">+ Nieuwe kaart</button>
+          <button id="btn-export-cards">Exporteer backup</button>
+          <label class="btn-file">Importeer backup<input type="file" id="import-file" accept=".json"></label>
+          <button class="danger" id="btn-reset-cards">Herstel origineel</button>
+        </div>
+        <div class="editor-layout">
+          <div>
+            <input type="search" class="editor-search" id="editor-search" placeholder="Zoek in vragen of antwoorden…">
+            <div class="editor-list" id="editor-list"></div>
+          </div>
+          <div class="editor-form" id="editor-form-wrap">
+            <h3 id="editor-form-title">Selecteer een kaart</h3>
+            <div id="editor-form-empty" class="editor-empty">Kies een kaart uit de lijst of maak een nieuwe aan.</div>
+            <div id="editor-form-fields" style="display:none">
+              <label for="edit-section">Onderwerp / hoorcollege</label>
+              <input list="section-options" id="edit-section" placeholder="bv. Hoorcollege 1: Inleiding">
+              <datalist id="section-options">
+                <option value="Aanvullende flashcards (PDF-dekking)"><option value="Digitale Tools (snel)"><option value="Gemengde examenvragen"><option value="Hoorcollege 1: Inleiding"><option value="Hoorcollege 2: Ouderschap"><option value="Hoorcollege 3: Relaties"><option value="Hoorcollege 4: School & Werk"><option value="Hoorcollege 5: Verlies"><option value="Hoorcollege 6: Omgaan met Life Events">
+              </datalist>
+              <label for="edit-question">Vraag</label>
+              <textarea id="edit-question" rows="3"></textarea>
+              <label for="edit-answer">Antwoord</label>
+              <textarea id="edit-answer" rows="5"></textarea>
+              <div class="editor-form-actions">
+                <button class="primary" id="btn-save-card">Opslaan</button>
+                <button id="btn-duplicate-card">Dupliceren</button>
+                <button class="danger" id="btn-delete-card">Verwijderen</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="panel-exam" class="panel">
+        <div id="exam-view-start">
+          <p class="exam-intro">
+            Oefen met meerkeuzevragen in <strong>examstijl</strong> (casussen, stellingen, tool-keuze).
+            Inclusief reconstructie van het <strong>1e zit 2025-2026</strong> (antwoorden op basis van cursus + studentenconsensus; niet officieel geverifieerd).
+            Resultaten worden <strong>lokaal opgeslagen</strong> in je browser (per apparaat, geen database).
+          </p>
+          <div class="exam-setup">
+            <h2>Nieuw oefenexamen</h2>
+            <div class="exam-setup-row">
+              <label>
+                Aantal vragen
+                <select id="exam-count">
+                  <option value="10">10 vragen</option>
+                  <option value="20" selected>20 vragen</option>
+                  <option value="30">30 vragen</option>
+                  <option value="50">50 vragen</option>
+                  <option value="all">Alle beschikbare vragen</option>
+                </select>
+              </label>
+              <label>
+                Onderwerp
+                <select id="exam-section-select">
+                  <option value="all">Alle vragen</option>
+                  <option value="1e zit 2025-2026">1e zit 2025-2026</option><option value="Digitale Tools">Digitale Tools</option><option value="Hoorcollege 1: Inleiding">Hoorcollege 1: Inleiding</option><option value="Hoorcollege 2: Ouderschap">Hoorcollege 2: Ouderschap</option><option value="Hoorcollege 3: Relaties">Hoorcollege 3: Relaties</option><option value="Hoorcollege 4: School & Werk">Hoorcollege 4: School & Werk</option><option value="Hoorcollege 5: Verlies">Hoorcollege 5: Verlies</option><option value="Hoorcollege 6: Omgaan met Life Events">Hoorcollege 6: Omgaan met Life Events</option>
+                </select>
+              </label>
+              <button type="button" class="primary" id="btn-start-exam">Start oefenexamen</button>
+            </div>
+            <p class="exam-sidebar-hint" style="margin:0">
+              Vragenset: <strong id="exam-bank-count">58</strong> meerkeuzevragen beschikbaar.
+            </p>
+          </div>
+          <div id="exam-recent-wrap">
+            <h2>Recente resultaten</h2>
+            <div id="exam-recent-list" class="exam-history-list"></div>
+            <p class="exam-empty" id="exam-recent-empty" style="display:none">Nog geen oefenexamens afgelegd op dit apparaat.</p>
+          </div>
+        </div>
+
+        <div id="exam-view-active" style="display:none">
+          <div class="exam-progress" id="exam-progress-text">Vraag 1 / 20</div>
+          <div class="exam-question-card" id="exam-question-card"></div>
+          <div class="exam-nav-btns">
+            <button type="button" id="btn-exam-prev">← Vorige</button>
+            <button type="button" id="btn-exam-next">Volgende →</button>
+            <button type="button" class="success" id="btn-exam-submit">Examen indienen</button>
+            <button type="button" id="btn-exam-cancel">Annuleren</button>
+          </div>
+        </div>
+
+        <div id="exam-view-results" style="display:none">
+          <div class="exam-results" id="exam-results-summary"></div>
+          <h2>Overzicht antwoorden</h2>
+          <div id="exam-review-list"></div>
+          <div class="exam-nav-btns" style="margin-top:1.5rem">
+            <button type="button" class="primary" id="btn-exam-retry">Nieuw oefenexamen</button>
+            <button type="button" id="btn-exam-back-start">Terug naar start</button>
+          </div>
+        </div>
+
+        <div id="exam-view-history" style="display:none">
+          <button type="button" class="filter-btn" id="btn-exam-back-from-history" style="margin-bottom:1rem">← Terug</button>
+          <div class="exam-results" id="exam-history-detail-summary"></div>
+          <div id="exam-history-detail-review"></div>
+        </div>
+      </section>
+
+      <section id="panel-mindmaps" class="panel panel-mindmaps">
+        <p class="mindmaps-intro">
+          Visueel overzicht per hoorcollege en per complex artikel. Kies links een mindmap.
+          Klik en sleep om te pannen · scroll om te zoomen (in de SVG).
+        </p>
+        <div id="mindmap-panels">
+          <div class="mm-panel" id="mm-hc1" data-mm-id="hc1" style="display:none"><h2>Inleiding</h2><p class="mm-subtitle">Life events, stress, veerkracht</p><div class="mm-diagram-wrap"><pre class="mermaid mm-source">mindmap
+  root((HC1 Inleiding))
+    Life events
+      Ingrepend en betekenisvol
+      Subjectieve impact
+      Tools
+        SRSS Holmes Rahe
+        USQ LEC-5
+    Benaderingen
+      Biopsychosociaal
+      Levensloop
+      Existentieel
+      Maatschappelijk
+    Impactfactoren
+      Levensgeschiedenis
+      Persoonlijkheid
+      Hechtingsstijl 4 stijlen
+      Gezondheid WHO
+    Welzijn tools
+      Positieve gezondheid 6 domeinen
+      PERMA Seligman
+      Set-point vs affectief
+      Balkmetafoor
+    Stress
+      Lazarus primair secundair
+      Eustress vs distress
+      HPA-as polyvagaal
+      Window of tolerance
+      Burn-out Maslach
+    Moderatoren
+      Appraisals attributies
+      Locus of control
+      Diabolomodel veerkracht
+    Kwetsbaarheid-stress
+      Diathese Zubin Spring
+      Touwmetafoor
+      G x E x C Schiele
+      Coping trainbaar</pre></div></div><div class="mm-panel" id="mm-hc2" data-mm-id="hc2" style="display:none"><h2>Ouderschap</h2><p class="mm-subtitle">Zwangerschap tot scheiding</p><div class="mm-diagram-wrap"><pre class="mermaid mm-source">mindmap
+  root((HC2 Ouderschap))
+    Zwangerschap
+      Fysiek per trimester
+      Mentaal hormonen identiteit
+      Babyblues 50-80 procent
+      Perinataal 1 op 5
+        Depressie angst OCS PTSS
+        Psychose 1-2 per 1000
+    Veerkracht perinataal
+      Matrescentie patrescentie
+      1000 dagen Heckman
+      PIMH IMH Opgroeien
+    Grootouders
+      Contact opvang back-up
+      Overbevraging
+    Pleegzorg adoptie
+      Crisis 48u perspectief
+      Risico vs bescherming
+      Adoptie stop 2027
+    Scheiding
+      Risico conflicten SES
+      Kinderen uitleg ruimte
+      Ouders luisteraar</pre></div></div><div class="mm-panel" id="mm-hc2-kinderverlies" data-mm-id="hc2-kinderverlies" style="display:none"><h2>Artikel: verlies van een kind</h2><p class="mm-subtitle">89 Belgische gezinnen, Resiliency Model</p><div class="mm-diagram-wrap"><pre class="mermaid mm-source">mindmap
+  root((Kinderverlies))
+    Rouw
+      Klassieke fasen
+      Modern reorganiseren
+      Gecompliceerde rouw
+    Resiliency Model
+      Beschermende factoren
+        Communicatie steun
+        Rituelen harmonie
+      Herstelfactoren
+        Hoop spiritualiteit
+        Betekenisgeving
+    Steun
+      Formeel informeel
+      Lotgenoten
+    Onderzoek 89 gezinnen
+      72 procent communicatie
+      Crisis als uitdaging
+      Ouders herdefiniëren
+      Siblings religie</pre></div></div><div class="mm-panel" id="mm-hc2-gezinsstress" data-mm-id="hc2-gezinsstress" style="display:none"><h2>Artikel: gezinsstress Amsterdam</h2><p class="mm-subtitle">4406 tieners, SDQ, RR 2,63</p><div class="mm-diagram-wrap"><pre class="mermaid mm-source">mindmap
+  root((Gezinsstress))
+    Methode
+      SDQ tieners
+      Ouders vragenlijst JGZ
+    Resultaten
+      17 procent gezinnen stress
+      31 vs 11 procent kinderen
+      RR 2,63
+      Opvoedstress sterkst
+      Cumulatief effect
+    Vicieuze cirkel
+      Ouderstress naar kind
+      Kind naar ouderstress
+    Risicogroepen
+      Jongens eenoudergezin
+      Lage SES buurt
+    Actie
+      JGZ vroeg signaleren
+      Gezinnen ondersteunen</pre></div></div><div class="mm-panel" id="mm-hc2-familiereflex" data-mm-id="hc2-familiereflex" style="display:none"><h2>Familiereflex</h2><p class="mm-subtitle">GGZ, triade cliënt-familie-hulpverlener</p><div class="mm-diagram-wrap"><pre class="mermaid mm-source">mindmap
+  root((Familiereflex))
+    Triade
+      Zorggebruiker
+      Familie naasten
+      Hulpverlener
+    Hulpverleners
+      Onthalen informeren
+      Kinderen betrekken
+      Crisis suïcide opname
+    Organisaties
+      Familiebeleid
+      Opleiding evaluatie
+    Implementatie
+      Shared decision-making
+      Tijd middelen coaching
+    Beperkingen
+      Residentiële focus
+      Weinig school werk buurt</pre></div></div><div class="mm-panel" id="mm-hc3" data-mm-id="hc3" style="display:none"><h2>Relaties</h2><p class="mm-subtitle">Vriendschap, siblings, discriminatie</p><div class="mm-diagram-wrap"><pre class="mermaid mm-source">mindmap
+  root((HC3 Relaties))
+    Vriendschap
+      Vertrouwen steun
+      Levensloop evolutie
+      Acceptatie vs hechtheid
+      70 procent vernieuwt 7 jaar
+    Siblings
+      Langstdurend ambivalent
+      Geweld tot 10 jaar
+      JOP-monitor conflict
+    Partner Sternberg
+      Intimiteit leuk vinden
+      Passie bevlieging
+      Toewijding lege liefde
+      Romantisch intimiteit passie
+      Gezelschap intimiteit toewijding
+      Dwaze liefde passie toewijding
+      Volmaakte liefde alle drie
+    Discriminatie racisme
+      Micro-agressies
+      Antiracismewet
+    Seksisme ijsberg
+      Definitie obv geslacht
+      Geweld begint met grap
+      Boven water moord geweld
+      Onder water moppen rollen
+    In-group out-group
+      Jane Elliott
+      Minimale groep
+      IAT Gladwell</pre></div></div><div class="mm-panel" id="mm-hc3-gender" data-mm-id="hc3-gender" style="display:none"><h2>Artikel: gender en TGD</h2><p class="mm-subtitle">Genderaffirmatieve zorg</p><div class="mm-diagram-wrap"><pre class="mermaid mm-source">mindmap
+  root((Gender TGD))
+    Kern
+      Geen psychische aandoening
+      Minority stress
+    Beschermend
+      Pride community steun
+      Safe spaces rolmodellen
+    Zorg
+      Genderbevestigend helpt
+      Consent niet gatekeeping
+      Hormonen bij opname
+      Naam voornaamwoorden
+    Niet doen
+      Conversietherapie
+      Therapie niet verplicht
+    Chirurgie
+      Roken complicaties
+      Extra begeleiding nazorg</pre></div></div><div class="mm-panel" id="mm-hc3-inclusief" data-mm-id="hc3-inclusief" style="display:none"><h2>Artikel: inclusieve zorg</h2><p class="mm-subtitle">19 professionals, cultuursensitief</p><div class="mm-diagram-wrap"><pre class="mermaid mm-source">mindmap
+  root((Inclusieve zorg))
+    Probleem
+      Meer discriminatie
+      Minder formele hulp
+      Stagediscriminatie
+    Methode
+      Kwalitatief 19 interviews
+      Sneeuwbalmethode
+      Thematische analyse
+    Professionals mét achtergrond
+      Sneller herkenning
+      Rolmodel vertrouwen
+    Goede zorg
+      Eerlijke diagnostiek
+      Empathie school
+      Erkenning discriminatie
+    Conclusie
+      Cultuursensitiviteit
+      Representatie diversiteit</pre></div></div><div class="mm-panel" id="mm-hc4" data-mm-id="hc4" style="display:none"><h2>School en Werk</h2><p class="mm-subtitle">Transities, pesten, burn-out</p><div class="mm-diagram-wrap"><pre class="mermaid mm-source">mindmap
+  root((HC4 School Werk))
+    Schooltransities
+      Kleuter lager middelbaar
+      Hoger onderwijs kot
+      Thuissituatie meenemen
+    Pesten
+      Langetermijn UK studie
+      Cyber anoniem altijd zichtbaar
+    Werk
+      Jobwissel ontslag
+      Werkloosheid 3 jaar
+      Afschrikeffect
+    Burn-out Maslach
+      Uitputting cynisme competentie
+      6 mismatch domeinen
+      Engagement tegenpool</pre></div></div><div class="mm-panel" id="mm-hc4-eclsk" data-mm-id="hc4-eclsk" style="display:none"><h2>Artikel: ECLS-K kindergarten</h2><p class="mm-subtitle">13.390 kinderen, schooltransitie</p><div class="mm-diagram-wrap"><pre class="mermaid mm-source">mindmap
+  root((ECLS-K))
+    Vraag
+      Overgangsproblemen voorspellen
+      Effect ondersteuning
+    Modellen
+      Mediatie ondersteuning effect
+      Moderatie buffer
+      LCA 3 schooltypes
+    Schooltypes
+      Minimal 29 procent
+      High basic 63 procent best
+      Intensive 9 procent niet beter
+    Conclusie
+      Info ouders klasbezoek
+      Preventief niet curatief
+      Geen buffering bestaand</pre></div></div><div class="mm-panel" id="mm-hc4-transitions" data-mm-id="hc4-transitions" style="display:none"><h2>Artikel: Transitions-programma</h2><p class="mm-subtitle">2397 studenten, mental health literacy</p><div class="mm-diagram-wrap"><pre class="mermaid mm-source">mindmap
+  root((Transitions))
+    Doel
+      Eerstejaars studenten
+      Mental health literacy
+      Life skills
+    Methode
+      Quasi-experimenteel
+      5 Canadese scholen
+      Interventie vs controle
+    Inhoud
+      Stress studie hulp zoeken
+      Flexibel workshops online
+    Resultaten
+      Meer kennis minder stigma
+      Minder stress
+      2,75x vaker hulp
+    Beperkingen
+      Geen randomisatie
+      Weinig divers
+    Vlaanderen
+      Nuttig maar tijd geld</pre></div></div><div class="mm-panel" id="mm-hc4-pabian" data-mm-id="hc4-pabian" style="display:none"><h2>Artikel: Pabian pesten</h2><p class="mm-subtitle">Ervaren impact belangrijker</p><div class="mm-diagram-wrap"><pre class="mermaid mm-source">mindmap
+  root((Pabian pesten))
+    Definitie
+      Intentioneel herhaald
+      Machtsonevenwicht
+    Gevolgen
+      Laag zelfbeeld
+      Sociale angst
+      Minder tevredenheid
+    Mechanismen
+      Minder steun
+      Minder veerkracht
+      Subjectieve impact
+    PTG mogelijk
+      Sterker empathischer
+    Studie
+      Vlaanderen Nederland
+      1010 plus 650 jongeren
+    Conclusie
+      Impact belangrijker dan ernst</pre></div></div><div class="mm-panel" id="mm-hc5" data-mm-id="hc5" style="display:none"><h2>Verlies</h2><p class="mm-subtitle">Migratie, WZC, palliatief, rouw</p><div class="mm-diagram-wrap"><pre class="mermaid mm-source">mindmap
+  root((HC5 Verlies))
+    Thuis verhuizen
+      Afscheid herinneringen
+    Migratie vrijwillig
+      Cultuurshock taal
+      EHERO plus 0,5 geluk
+    WZC
+      38 procent negatief beeld
+      Autonomie privacy verlies
+      Dementie onbegrepen gedrag
+    Ouder worden
+      Pensionering lege nest
+      Herhaald verlies
+    Palliatief
+      Kwaliteit van leven
+      Distress depressie niet normaal
+      Levensverhaal therapie
+    Levenseinde A-D
+      Geen zinloze behandeling
+      Palliatieve sedatie
+      Euthanasie voorwaarden</pre></div></div><div class="mm-panel" id="mm-hc5-ethiopie" data-mm-id="hc5-ethiopie" style="display:none"><h2>Artikel: vluchtelingen Ethiopië</h2><p class="mm-subtitle">Bronnen veerkracht jongeren</p><div class="mm-diagram-wrap"><pre class="mermaid mm-source">mindmap
+  root((Ethiopië vluchtelingen))
+    Methode
+      Focusgroepen interviews
+      Jongeren begeleiders
+    Veerkracht bronnen
+      Sociale steun familie peers
+      Werk structuur eigenwaarde
+      Onderwijs toekomst
+      Religie hoop rust
+      Gemeenschap integratie
+    Risico's
+      Kinderarbeid schooluitval
+      Eenzaamheid niet-begeleid
+    Van energie naar kracht
+      Energie naar frustratie
+      Kleinschalige opvang
+      Taal als middel
+      Werk integratie</pre></div></div><div class="mm-panel" id="mm-hc5-bonanno" data-mm-id="hc5-bonanno" style="display:none"><h2>Artikel: Bonanno partnerverlies</h2><p class="mm-subtitle">205 deelnemers, prospectief</p><div class="mm-diagram-wrap"><pre class="mermaid mm-source">mindmap
+  root((Bonanno rouw))
+    Methode sterk
+      Prospectief vóór overlijden
+      6 en 18 maanden na
+    Patronen
+      Resilience 46 procent meest
+      Common grief minder vaak
+      Chronic grief afhankelijkheid
+      Chronic depression vooraf
+      Depressed-improved zorg last
+      Delayed grief amper
+    Inzicht
+      Weinig rouw niet koud
+      Preloss factoren cruciaal
+      Geen juiste manier rouwen
+    Klinisch
+      Niet pathologiseren
+      Individuele verschillen</pre></div></div><div class="mm-panel" id="mm-hc6" data-mm-id="hc6" style="display:none"><h2>Omgaan met life events</h2><p class="mm-subtitle">Coping, betekenis, herstel, PTG</p><div class="mm-diagram-wrap"><pre class="mermaid mm-source">mindmap
+  root((HC6 Omgaan met LE))
+    AREA-model
+      Attent React Explain Adapt
+      Betekenisgeving centraal
+    Lazarus
+      Primair schade bedreiging uitdaging
+      Secundair hulpbronnen
+      Smith emoties
+    SOC Antonovsky
+      Begrijpelijk hanteerbaar betekenisvol
+    Palliatief palet Portzky
+      Positief tot destructief
+      UCL vs P3-schaal
+      Presenteïsme
+    Coping
+      5 stijlen Cohen functies
+      Flexibiliteit
+    Betekenis Crystal Park
+      Global vs situationeel
+      Discrepantie stress
+    Sociale steun
+      Materieel informatief emotioneel
+    Herstel GGZ
+      Niet genezing CHIME
+      Anthony 4 fasen
+      Ervaringsdeskundigheid
+    PTG
+      5 domeinen
+      Hoger dan veerkracht</pre></div></div><div class="mm-panel" id="mm-hc6-rouw" data-mm-id="hc6-rouw" style="display:none"><h2>Rouwmodellen</h2><p class="mm-subtitle">Kübler-Ross, Worden, DPM, IPM</p><div class="mm-diagram-wrap"><pre class="mermaid mm-source">mindmap
+  root((Rouwmodellen))
+    Kübler-Ross
+      5 fasen niet lineair
+      Kritiek niet iedereen
+    Worden 4 taken
+      Erkennen pijn aanpassen verbinden
+    Dual Process Stroebe Schut
+      Verliesgericht herstelgericht
+      Slinger geen eindpunt
+    IPM Guldin Leget
+      Fysiek emotioneel cognitief
+      Sociaal spiritueel
+      Existentiële spanningen
+    Bonanno link
+      Veerkracht meest voorkomend
+    Praktijk
+      Rouwen is geleerd
+      Cultuur religie opvoeding</pre></div></div><div class="mm-panel" id="mm-tools" data-mm-id="tools" style="display:none"><h2>Digitale tools</h2><p class="mm-subtitle">Per hoorcollege</p><div class="mm-diagram-wrap"><pre class="mermaid mm-source">mindmap
+  root((Digitale tools))
+    Ouderschap
+      perinatalehulp.be
+      wolkinmijnhoofd.be
+      scheidingskoffer.be
+      a-buddy adoptie
+    Relaties
+      mijnpositievegezondheid.nl
+      reacttoracism.be
+      noknok.be
+    School werk
+      moodspace.be examen
+      allesoverpesten.be
+      tegek.be burn-out
+    Verlies
+      missingyou.be
+      rouwkost
+      bovendewolken.be</pre></div></div>
+        </div>
+      </section>
+
+      <section id="panel-checklist" class="panel">
+        <h2>Snelle examenchecklist</h2>
+        <p style="color:var(--muted)">Vink af wat je vanbuiten kent. Je voortgang wordt lokaal opgeslagen.</p>
+        <div class="checklist" id="checklist">
+          <label><input type="checkbox" data-id="c0"><span>Life events = subjectief; benaderingen kennen</span></label><label><input type="checkbox" data-id="c1"><span>SRSS, PERMA, positieve gezondheid, balkmetafoor</span></label><label><input type="checkbox" data-id="c2"><span>Lazarus (primair/secundair), polyvagaal, window of tolerance</span></label><label><input type="checkbox" data-id="c3"><span>Kwetsbaarheid-stressmodel, G×E×C, diabolomodel veerkracht</span></label><label><input type="checkbox" data-id="c4"><span>Perinataal: babyblues vs. depressie; eerste 1000 dagen; Familiereflex</span></label><label><input type="checkbox" data-id="c5"><span>Vriendschappen levensloop; siblings; gender/TGD; inclusieve zorg</span></label><label><input type="checkbox" data-id="c6"><span>Schooltransities; Transitions-programma; pesten (Pabian); burn-out (6 domeinen)</span></label><label><input type="checkbox" data-id="c7"><span>Migratie vrijwillig/onvrijwillig; WZC; palliatief; euthanasie-voorwaarden</span></label><label><input type="checkbox" data-id="c8"><span>Bonanno rouwpatronen; AREA; SOC; palliatief palet; rouwmodellen</span></label><label><input type="checkbox" data-id="c9"><span>Herstel vs. veerkracht; CHIME; PTG (5 domeinen)</span></label><label><input type="checkbox" data-id="c10"><span>Digitale tools per hoorcollege</span></label>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="save-toast" id="save-toast">Opgeslagen</div>
+
+  <script>
+    const DEFAULT_CARDS = [{"id": "45347b91b0c6", "section": "Hoorcollege 1: Inleiding", "q": "Wat is een life event?", "a": "Een ingrijpende, uitzonderlijke of betekenisvolle gebeurtenis die destabiliserend kan zijn en het functioneren en welzijn beïnvloedt."}, {"id": "efd8c1aec613", "section": "Hoorcollege 1: Inleiding", "q": "Noem 3 tools om life events in kaart te brengen.", "a": "SRSS (Social Readjustment Rating Scale), USQ (Undergraduate Stress Questionnaire), LEC-5."}, {"id": "d4ad1ba3f90b", "section": "Hoorcollege 1: Inleiding", "q": "Wat zijn de 4 benaderingen van life events?", "a": "Biopsychosociaal, levensloop, existentieel, maatschappelijk (micro/exo/macro)."}, {"id": "ea09f3fc00e7", "section": "Hoorcollege 1: Inleiding", "q": "Wat houdt de existentiële benadering in?", "a": "Mensen hebben schema's voor betekenis; een life event dat niet past → nieuw proces van doel, coherentie en waarde."}, {"id": "5947536f5f42", "section": "Hoorcollege 1: Inleiding", "q": "Waarom is de impact van een life event subjectief?", "a": "Dezelfde gebeurtenis wordt anders ervaren afhankelijk van persoon, context en interpretatie."}, {"id": "92a57e3e66b3", "section": "Hoorcollege 1: Inleiding", "q": "Hoe beïnvloedt levensgeschiedenis de impact?", "a": "Eerdere ervaringen vormen een referentiekader voor inschatting, coping en emotionele reactie."}, {"id": "bd3a0cba22f9", "section": "Hoorcollege 1: Inleiding", "q": "Wat is het model van Bartholomew & Horowitz?", "a": "Hechtingsstijlen op basis van 2 dimensies: model van zelf (positief/negatief) × model van anderen (vertrouwen/vermijding) → 4 stijlen."}, {"id": "abaf3090d177", "section": "Hoorcollege 1: Inleiding", "q": "Wat zijn de 6 domeinen van positieve gezondheid?", "a": "Lichaamsfuncties, mentaal welbevinden, zingeving, kwaliteit van leven, meedoen, dagelijks functioneren."}, {"id": "895b7ae15fd7", "section": "Hoorcollege 1: Inleiding", "q": "Wat betekent PERMA?", "a": "Positive emotions, Engagement, Relationships, Meaning, Achievement (Seligman)."}, {"id": "e04eefca0f33", "section": "Hoorcollege 1: Inleiding", "q": "Wat is het verschil tussen set-point theorie en affectieve theorie?", "a": "Set-point: SWB keert terug naar basisniveau. Affectief: life events hebben langdurige impact. Beide vullen elkaar aan."}, {"id": "9fdc75bb60bb", "section": "Hoorcollege 1: Inleiding", "q": "Wat is de balkmetafoor?", "a": "Draaglast (eisen/stressoren) vs. draagkracht (coping, steun, energie). Overbelasting als draaglast > draagkracht."}, {"id": "649e0ac0d207", "section": "Hoorcollege 1: Inleiding", "q": "Wat is stress volgens Lazarus?", "a": "Resultaat van interactie persoon–situatie; primair (bedreiging/schade/uitdaging?) + secundair (kan ik ermee omgaan?)."}, {"id": "97355a2f98cb", "section": "Hoorcollege 1: Inleiding", "q": "Wat meet de SRRS van Holmes & Rahe?", "a": "Life Change Units; cumulatief effect van gebeurtenissen. Beperking: geen subjectieve interpretatie."}, {"id": "68f8a1e2ff68", "section": "Hoorcollege 1: Inleiding", "q": "Noem 3 beperkingen van de SRRS.", "a": "Geen subjectieve interpretatie, culturele verschillen, herinneringsbias."}, {"id": "3d01e1c9b800", "section": "Hoorcollege 1: Inleiding", "q": "Wat zijn de 3 dimensies van burn-out volgens Maslach?", "a": "Emotionele uitputting, depersonalisatie/cynisme, verminderde prestaties/persoonlijke bekwaamheid."}, {"id": "4d3b923b0105", "section": "Hoorcollege 1: Inleiding", "q": "Wat zijn de 3 systemen in de polyvagaal theorie?", "a": "Ventraal vagale (veiligheid, verbinding), sympathisch (fight/flight), dorsaal vagale (freeze/fawn)."}, {"id": "a0335e6e32c6", "section": "Hoorcollege 1: Inleiding", "q": "Wat is neuroceptie?", "a": "Onbewust proces dat continu de omgeving scant op gevaar en veiligheid."}, {"id": "0f797c061b9e", "section": "Hoorcollege 1: Inleiding", "q": "Wat is co-regulatie?", "a": "De ander gebruiken om jezelf te kalmeren."}, {"id": "5dbc86c3967b", "section": "Hoorcollege 1: Inleiding", "q": "Wat is het window of tolerance?", "a": "Zone tussen hyperarousal (overprikkeling) en hypoarousal (onderprikkeling) waar iemand genoeg veiligheid ervaart."}, {"id": "12a0c3a95aac", "section": "Hoorcollege 1: Inleiding", "q": "Wat is een primaire vs. secundaire appraisal?", "a": "Primair: inschatting van de situatie zelf. Secundair: beoordeling van hulpbronnen en copingvermogen."}, {"id": "c88513362b3c", "section": "Hoorcollege 1: Inleiding", "q": "Wat zijn de dimensies van attributies?", "a": "Intern/extern, stabiel/instabiel, globaal/specifiek, controleerbaar/oncontroleerbaar."}, {"id": "6634a6c04362", "section": "Hoorcollege 1: Inleiding", "q": "Wat is locus of control?", "a": "Mate waarin iemand verwacht eigen leven te kunnen beïnvloeden (intern vs. extern)."}, {"id": "091283541752", "section": "Hoorcollege 1: Inleiding", "q": "Wat is veerkracht?", "a": "Vermogen om zich aan te passen en terug te veren na een life event; tegenovergestelde van kwetsbaarheid."}, {"id": "69534dd993b2", "section": "Hoorcollege 1: Inleiding", "q": "Wat zijn de 3 thema's in het diabolomodel van veerkracht?", "a": "Zelfzorg (basis), zelfontplooiing, verbondenheid (centrale spil)."}, {"id": "5f35c5d10716", "section": "Hoorcollege 1: Inleiding", "q": "Wat is het kwetsbaarheid-stressmodel?", "a": "Psychische problemen ontstaan door interactie van kwetsbaarheid (diathese) en stressfactoren (life events)."}, {"id": "7b6daa1e799e", "section": "Hoorcollege 1: Inleiding", "q": "Wat is het verschil tussen risicofactor en kwetsbaarheid?", "a": "Risicofactor verhoogt de kans; kwetsbaarheid is het onderliggend mechanisme dat tot pathologie kan leiden."}, {"id": "11db9de52f8a", "section": "Hoorcollege 1: Inleiding", "q": "Wat is de touwmetafoor?", "a": "Gewicht = stress/draaglast; touw = draagkracht; touw kan rekken of breken."}, {"id": "af00dbc21c6b", "section": "Hoorcollege 1: Inleiding", "q": "Wat is het G × E × C model?", "a": "Genetics × Environment × Coping (Schiele); coping kan impact van genetische kwetsbaarheid en stress bufferen."}, {"id": "1bb4a8d7f203", "section": "Hoorcollege 2: Ouderschap", "q": "Wat gebeurt er neurologisch in het 1e trimester bij de moeder?", "a": "Afname grijze stof (verband met hechting), toename witte stof (communicatie emotionele/visuele netwerken)."}, {"id": "031916272f42", "section": "Hoorcollege 2: Ouderschap", "q": "Wat zijn babyblues en hoe vaak komen ze voor?", "a": "Emotionele achtbaan na bevalling; 50–80% vrouwen. Geen aandoening maar hormonale aanpassing."}, {"id": "5111651dd9a1", "section": "Hoorcollege 2: Ouderschap", "q": "Wanneer pieken babyblues en wanneer verdwijnen ze normaal?", "a": "Piek dag 3–5; normaal weg na 6e week."}, {"id": "22faeffe3a84", "section": "Hoorcollege 2: Ouderschap", "q": "Hoeveel vrouwen heeft psychische problemen in de perinatale periode?", "a": "Ongeveer 1 op 5."}, {"id": "328d6b8ecb38", "section": "Hoorcollege 2: Ouderschap", "q": "Wat zijn de prevalenties van perinatale depressie, angst en postpartum psychose?", "a": "Depressie 7–15% (zwangerschap), 10% postpartum; angst ~13%; psychose 1–2/1000 (75% ongediagnosticeerd)."}, {"id": "5e3ffce454c9", "section": "Hoorcollege 2: Ouderschap", "q": "Wat is het Resiliency Model of Family Stress?", "a": "Model dat onderzoekt hoe gezinnen omgaan met stress en welke factoren herstel bevorderen na verlies van een kind."}, {"id": "62076fd80d48", "section": "Hoorcollege 2: Ouderschap", "q": "Wat is het verschil tussen beschermende en herstelfactoren bij rouw?", "a": "Beschermend = voorkomen negatieve impact (communicatie, steun). Herstel = helpen opnieuw functioneren (hoop, spiritualiteit)."}, {"id": "9bede5856e76", "section": "Hoorcollege 2: Ouderschap", "q": "Wat was het belangrijkste resultaat van het onderzoek bij 89 Belgische gezinnen na kinderverlies?", "a": "72% noemde communicatie als belangrijkste hulpbron; crisis als uitdaging (niet ontkennen) → betere aanpassing."}, {"id": "e1634254eb0a", "section": "Hoorcollege 2: Ouderschap", "q": "Wat zijn matrescentie en patrescentie?", "a": "Transitie naar ouderschap vergelijkbaar met adolescentie; zoektocht naar identiteit als moeder/vader."}, {"id": "38095033191a", "section": "Hoorcollege 2: Ouderschap", "q": "Wat zijn de 3 onderdelen van de transitie naar ouderschap?", "a": "Beeldvorming & verwachtingen, aanpassingsvermogen, engagement/betrokkenheid."}, {"id": "475bdb5d7a8f", "section": "Hoorcollege 2: Ouderschap", "q": "Wat zijn de eerste 1000 dagen?", "a": "Van bevruchting tot 2e verjaardag; snelle orgaan-/hersenontwikkeling, extra kwetsbaar."}, {"id": "7a4412444501", "section": "Hoorcollege 2: Ouderschap", "q": "Wat zegt Heckman over investeringen in vroege ontwikkeling?", "a": "Investeringen in vroege ontwikkeling leveren meer op dan op latere leeftijd."}, {"id": "48aaba5b9b01", "section": "Hoorcollege 2: Ouderschap", "q": "Wat is PIMH?", "a": "Parent Infant Mental Health: perinatale mentale gezondheid van (aanstaande) ouders en kind centraal."}, {"id": "b88195ef111a", "section": "Hoorcollege 2: Ouderschap", "q": "Wat was de RR in het Amsterdamse gezinsstress-onderzoek (4406 tieners)?", "a": "RR = 2,63: kinderen uit gezinnen met stress hadden bijna 3× vaker sociaal-emotionele problemen."}, {"id": "0aae4c8e2176", "section": "Hoorcollege 2: Ouderschap", "q": "Welk type gezinsstress had de sterkste impact op kinderen?", "a": "Opvoedstress."}, {"id": "ef0e3aa78b96", "section": "Hoorcollege 2: Ouderschap", "q": "Wat meet de SDQ?", "a": "Strengths and Difficulties Questionnaire: emotionele problemen, gedrag, hyperactiviteit, prosociaal gedrag, leeftijdsgenoten."}, {"id": "f032134db544", "section": "Hoorcollege 2: Ouderschap", "q": "Wat is Familiereflex?", "a": "GGZ-visie waarbij familie actief en gelijkwaardig betrokken wordt bij zorg en herstel (triade: cliënt–familie–hulpverlener)."}, {"id": "3b2f4e5f374f", "section": "Hoorcollege 2: Ouderschap", "q": "Wat is shared decision-making in Familiereflex?", "a": "Samen beslissen rekening houdend met wensen cliënt, noden familie en context."}, {"id": "0e9aa2e850b2", "section": "Hoorcollege 2: Ouderschap", "q": "Hoeveel aanvragen pleegzorg vindt een plaats?", "a": "40%."}, {"id": "161011878639", "section": "Hoorcollege 2: Ouderschap", "q": "Wanneer stopt interlandelijke adoptie in Vlaanderen?", "a": "Definitief stop tegen 2027 (uitdoofscenario)."}, {"id": "8566a911eb17", "section": "Hoorcollege 2: Ouderschap", "q": "Wat hebben kinderen bij scheiding nodig?", "a": "Uitleg, ruimte om te voelen/praten, tijd om te rouwen, opgeloste conflicten, gezien worden in krachten."}, {"id": "e4c716febb1c", "section": "Hoorcollege 2: Ouderschap", "q": "Wat hebben ouders bij scheiding nodig?", "a": "Info/klankbord, niet-veroordelende luisteraar, aandacht voor eigen verdriet."}, {"id": "e578aa78479c", "section": "Hoorcollege 3: Relaties", "q": "Wat maakt vriendschap uniek t.o.v. familie?", "a": "Vrijwillig, maar niet vrijblijvend; vertrouwen en zelfonthulling zijn centraal."}, {"id": "7f11df6f3fc5", "section": "Hoorcollege 3: Relaties", "q": "Wat is co-ruminatie bij adolescentenvriendschappen?", "a": "Samen piekeren waardoor negatieve gevoelens versterkt worden."}, {"id": "4c50899c77b3", "section": "Hoorcollege 3: Relaties", "q": "Wat voorspelt sociale acceptatie in vroege adolescentie?", "a": "Minder sociale angst, betere fysieke gezondheid, minder agressie, meer jobtevredenheid later."}, {"id": "5f16c7742f02", "section": "Hoorcollege 3: Relaties", "q": "Wat voorspelt hechte vriendschappen in late adolescentie?", "a": "Betere romantische relaties, minder relationele onzekerheid, meer jobtevredenheid."}, {"id": "2af501d61b97", "section": "Hoorcollege 3: Relaties", "q": "Hoe vaak vernieuwen vriendschapsnetwerken zich (Utrecht)?", "a": "70% vernieuwt elke 7 jaar (functie verandert, niet altijd verdwijnen)."}, {"id": "16270fe631d3", "section": "Hoorcollege 3: Relaties", "q": "Wat maakt siblingrelaties uniek?", "a": "Langstdurende relatie; ambivalent (warmte + conflict); sociale leeromgeving."}, {"id": "5fa193d73b1e", "section": "Hoorcollege 3: Relaties", "q": "Wanneer komt siblinggeweld het meest voor?", "a": "Vooral in de kindertijd (tot ~10 jaar); meer bij lagere SES."}, {"id": "0ce99b14ef92", "section": "Hoorcollege 3: Relaties", "q": "Wat toonde de JOP-monitor 2023 over siblingconflict?", "a": "~1/5 maandelijks/wekelijks conflict; ~5% dagelijks fysieke/verbale agressie."}, {"id": "a761b453064e", "section": "Hoorcollege 3: Relaties", "q": "Wat is discriminatie?", "a": "Ongerechtvaardigd onderschien op basis van een beschermd criterium op een domein waar wetgeving geldt."}, {"id": "345db0c65b1d", "section": "Hoorcollege 3: Relaties", "q": "Wat is racisme (definitie in samenvatting)?", "a": "Systeem van dominantie, macht en privileges gebaseerd op raciale groepsaanduidingen; structurele ongelijkheid."}, {"id": "e571648a69f5", "section": "Hoorcollege 3: Relaties", "q": "Wat is een micro-agressie?", "a": "Micro-aanval, belediging of invalidatie, vaak subtiel."}, {"id": "be4691927ad2", "section": "Hoorcollege 3: Relaties", "q": "Wat is het verschil tussen sekse en gender?", "a": "Sekse = biologisch; gender = culturele normen en verwachtingen rond mannelijkheid/vrouwelijkheid."}, {"id": "7c8264b8cf9d", "section": "Hoorcollege 3: Relaties", "q": "Is transgender zijn een psychische aandoening?", "a": "Nee. Mentale problemen komen vaker voor door minority stress (discriminatie, stigma, afwijzing)."}, {"id": "c667294150ea", "section": "Hoorcollege 3: Relaties", "q": "Mag psychotherapie verplicht zijn voor genderbevestigende zorg?", "a": "Nee. Therapie mag geen voorwaarde zijn; wel nuttig voor coping en zelfacceptatie."}, {"id": "e3852ee97a74", "section": "Hoorcollege 3: Relaties", "q": "Wat is conversietherapie en wat is het standpunt?", "a": "Pogingen genderidentiteit te veranderen; afgewezen — schadelijk, meer depressie/suïcidaliteit."}, {"id": "11d971e8c400", "section": "Hoorcollege 3: Relaties", "q": "Wat is out-group homogeniteit?", "a": "Mensen vinden eigen groep divers en andere groepen allemaal hetzelfde."}, {"id": "c1380fa2fa06", "section": "Hoorcollege 3: Relaties", "q": "Wat toonde de oefening van Jane Elliott?", "a": "Blue eyes/brown eyes: vooroordelen ontstaan snel; wie discriminatie ondervond, discrimineert minder snel zelf."}, {"id": "d643a49abe50", "section": "Hoorcollege 3: Relaties", "q": "Wat is de minimale groepssituatie?", "a": "Experiment dat in-group favoritisme en out-group ondermijning toont."}, {"id": "55b4e5b595bd", "section": "Hoorcollege 3: Relaties", "q": "Wat meet de IAT?", "a": "Implicit Associations Test: onbewuste/automatische associaties en attitudes."}, {"id": "43095558c20e", "section": "Hoorcollege 3: Relaties", "q": "Waarom is cultuursensitieve zorg belangrijk?", "a": "Jongeren met migratieachtergrond ervaren meer discriminatie maar maken minder gebruik van formele hulp."}, {"id": "d2e7b70d5890", "section": "Hoorcollege 3: Relaties", "q": "Wat is het verschil tussen professionals met en zonder migratieachtergrond in het inclusieve zorg-onderzoek?", "a": "Met achtergrond: sneller herkenning discriminatie, meer vertrouwen, rolmodel. Zonder: meer nadruk op \"algemene openheid\"."}, {"id": "a119df842529", "section": "Hoorcollege 4: School & Werk", "q": "Wat voorspellen overgangsproblemen bij kindergarten?", "a": "Lagere schoolprestaties, meer emotionele/gedragsproblemen — effect tot 5e leerjaar."}, {"id": "3c3c23d76f34", "section": "Hoorcollege 4: School & Werk", "q": "Welk type schoolondersteuning werkte het best bij kindergarten-overgang?", "a": "High basic supports (63%): info naar ouders + klasbezoeken. Intensive supports niet beter."}, {"id": "30128135e1b0", "section": "Hoorcollege 4: School & Werk", "q": "Werken transition supports als buffer bij bestaande overgangsproblemen?", "a": "Nee. Ze werken vooral preventief, niet curatief."}, {"id": "72ebd008cd16", "section": "Hoorcollege 4: School & Werk", "q": "Wat is het Transitions-programma?", "a": "Mental health literacy + life skills voor eerstejaarsstudenten hoger onderwijs."}, {"id": "a0a849446062", "section": "Hoorcollege 4: School & Werk", "q": "Wat waren de resultaten van Transitions (2397 studenten)?", "a": "Meer kennis, minder stigma, minder stress, 2,75× vaker hulp zoeken."}, {"id": "95d09fb4e1d8", "section": "Hoorcollege 4: School & Werk", "q": "Hoe definieert Pabian et al. pesten?", "a": "Intentioneel agressief gedrag, herhaaldelijk, met machtsonevenwicht."}, {"id": "2313b9a9039d", "section": "Hoorcollege 4: School & Werk", "q": "Wat is het belangrijkste inzicht van Pabian et al. over pesten?", "a": "Ervaren (subjectieve) impact is belangrijker dan objectieve ernst; effecten lopen via negatieve impact."}, {"id": "36489f024335", "section": "Hoorcollege 4: School & Werk", "q": "Wat zijn de 3 gevolgen van pesten in het artikel?", "a": "Lager zelfbeeld, sociale interactie-angst, minder levenstevredenheid."}, {"id": "d1585053e11d", "section": "Hoorcollege 4: School & Werk", "q": "Wat is posttraumatische groei bij pesten?", "a": "Positieve groei na pesten (sterker, empathischer) — maar neemt negatieve gevolgen niet volledig weg."}, {"id": "bd72716dc840", "section": "Hoorcollege 4: School & Werk", "q": "Wat is het afschrikeffect bij ontslag?", "a": "Mensen die ontslagen waren, blijven bang opnieuw hun job te verliezen, ook met nieuw werk."}, {"id": "26668d4a957d", "section": "Hoorcollege 4: School & Werk", "q": "Hoe lang kan het duren voor welbevinden herstelt na werkloosheid?", "a": "Soms tot 3 jaar, vooral bij weinig kansen op nieuw werk."}, {"id": "bd474525cd94", "section": "Hoorcollege 4: School & Werk", "q": "Wat zijn de 6 mismatch-domeinen van Maslach & Leiter?", "a": "Workload, control, reward, community, fairness, values."}, {"id": "a40cff054113", "section": "Hoorcollege 4: School & Werk", "q": "Wat is het verschil tussen stress en burn-out?", "a": "Stress = te veel van alles; burn-out = leegte, uitputting, afstand nemen."}, {"id": "f736a98b9f15", "section": "Hoorcollege 4: School & Werk", "q": "Wat is engagement als tegenpool van burn-out?", "a": "Energie, betrokkenheid, enthousiasme, voldoening, absorptie in het werk."}, {"id": "e15029116cac", "section": "Hoorcollege 5: Verlies", "q": "Wat toonde EHERO over geluk en migratie?", "a": "Migranten ~0,5 punt gelukkiger (0–10 schaal), vooral eerste 5 jaar na verhuis."}, {"id": "263d4f2fbd32", "section": "Hoorcollege 5: Verlies", "q": "Wat zijn bronnen van veerkracht bij jonge vluchtelingen in Ethiopië?", "a": "Sociale steun, werk, onderwijs, religie, gemeenschapsbetrokkenheid."}, {"id": "0c4242c6d7bf", "section": "Hoorcollege 5: Verlies", "q": "Wat is de boodschap van \"Van energie naar kracht\"?", "a": "Vluchtelingen hebben energie bij aankomst, maar frustratie als ze geen kansen krijgen; kleinschalige opvang en werk helpen."}, {"id": "83dda3d154a3", "section": "Hoorcollege 5: Verlies", "q": "Hoeveel 60-plussers heeft een negatief beeld van WZC's?", "a": "38%, vooral wie er nooit komt of niemand kent die er verblijft."}, {"id": "dd4efeec443f", "section": "Hoorcollege 5: Verlies", "q": "Wat is onbegrepen gedrag bij dementie in WZC?", "a": "Weglopen, roepen, agressie — reactie op desoriëntatie en verlies vertrouwde omgeving."}, {"id": "9ee84ef6654a", "section": "Hoorcollege 5: Verlies", "q": "Wat is palliatieve zorg?", "a": "Benadering die kwaliteit van leven verbetert bij levensbedreigende ziekte; verlicht lijden; dood niet bespoedigen/uitstellen."}, {"id": "b9d0d5211d90", "section": "Hoorcollege 5: Verlies", "q": "Is depressie een normaal onderdeel van sterven?", "a": "Nee. Verdriet wel, maar depressie moet herkend en behandeld worden."}, {"id": "902d60354caa", "section": "Hoorcollege 5: Verlies", "q": "Wat is demoralisatie in palliatieve zorg?", "a": "Verlies van hoop en betekenis, gevoel een last te zijn, zich gevangen voelen."}, {"id": "69fd8f180b94", "section": "Hoorcollege 5: Verlies", "q": "Wat zijn de 4 vormen van levenseinde (A–D)?", "a": "A: geen zinloze behandeling; B: pijnstilling/palliatieve sedatie; C: euthanasie; D: zonder wettelijk kader."}, {"id": "8919a7c71c7e", "section": "Hoorcollege 5: Verlies", "q": "Noem 3 voorwaarden voor euthanasie.", "a": "Wilsbekwaam, ondraaglijk fysiek/psychisch lijden, medisch uitzichtloze aandoening, vrijwillig schriftelijk verzoek."}, {"id": "a727edaf7756", "section": "Hoorcollege 5: Verlies", "q": "Wat is het meest voorkomende rouwpatroon bij Bonanno et al.?", "a": "Resilience (~46%): relatief stabiel functioneren na partnerverlies."}, {"id": "aa2a048bdf64", "section": "Hoorcollege 5: Verlies", "q": "Welk rouwpatroon werd amper gevonden door Bonanno?", "a": "Delayed grief."}, {"id": "83f70acea7bf", "section": "Hoorcollege 5: Verlies", "q": "Wat is chronic grief volgens Bonanno?", "a": "Langdurige intense rouw; samenhang met sterke afhankelijkheid van partner vóór overlijden."}, {"id": "5bc5281c9c09", "section": "Hoorcollege 5: Verlies", "q": "Betekent weinig zichtbare rouw dat iemand koud was?", "a": "Nee. Bonanno toont dat resilient mensen niet koud, ongehecht of afstandelijk waren."}, {"id": "90166297ec84", "section": "Hoorcollege 5: Verlies", "q": "Waarom is het Bonanno-onderzoek methodologisch sterk?", "a": "Prospectief: deelnemers werden al vóór het overlijden onderzocht → onderscheid chronische depressie vs. rouw."}, {"id": "92c879108978", "section": "Hoorcollege 6: Omgaan met Life Events", "q": "Wat betekent AREA?", "a": "Attent → React → Explain → Adapt (Wilson & Gilbert). Betekenisgeving is cruciaal."}, {"id": "eab02f0f6037", "section": "Hoorcollege 6: Omgaan met Life Events", "q": "Wat zijn de 3 mogelijke primaire beoordelingen bij Lazarus?", "a": "Schade/verlies, bedreiging, uitdaging."}, {"id": "43b3e9ef5867", "section": "Hoorcollege 6: Omgaan met Life Events", "q": "Wanneer ontstaat stress volgens Lazarus?", "a": "Situatie als belangrijk/bedreigend beoordeeld + onvoldoende hulpbronnen om ermee om te gaan."}, {"id": "5d0640061857", "section": "Hoorcollege 6: Omgaan met Life Events", "q": "Wat zijn de 3 elementen van Sense of Coherence (Antonovsky)?", "a": "Comprehensibility (begrijpelijkheid), Manageability (hanteerbaarheid), Meaningfulness (betekenisvolheid)."}, {"id": "bfcbb857a84e", "section": "Hoorcollege 6: Omgaan met Life Events", "q": "Wat is het palliatief palet (Portzky)?", "a": "Alle activiteiten om stress/negatieve gevoelens tijdelijk te verminderen; continuüm van positief tot destructief."}, {"id": "2363a8fb16ba", "section": "Hoorcollege 6: Omgaan met Life Events", "q": "Wat is het verschil tussen UCL palliatief subschaal en P3-schaal?", "a": "UCL mengt positieve en destructieve activiteiten; P3 onderscheidt ze."}, {"id": "62c941558731", "section": "Hoorcollege 6: Omgaan met Life Events", "q": "Wat is presenteïsme?", "a": "Aanwezig blijven werken terwijl je ziek of uitgeput bent → verhoogt burn-outrisico."}, {"id": "ba451cfde645", "section": "Hoorcollege 6: Omgaan met Life Events", "q": "Wat is het verschil tussen sociale en emotionele eenzaamheid?", "a": "Sociaal = tekort aan contacten (oplosbaar met meer contact). Emotioneel = gemis van één specifieke persoon (moeilijker op te lossen)."}, {"id": "18eb640c4195", "section": "Hoorcollege 6: Omgaan met Life Events", "q": "Noem 5 copingstijlen.", "a": "Probleemgericht, emotiegericht, controlegericht, vermijdend, betekenisgericht."}, {"id": "ece1eb9444e0", "section": "Hoorcollege 6: Omgaan met Life Events", "q": "Wat zijn de 5 functies van coping (Cohen & Lazarus)?", "a": "Schade verminderen, aanpassen, zelfbeeld behouden, emotioneel evenwicht, relaties behouden."}, {"id": "291997623928", "section": "Hoorcollege 6: Omgaan met Life Events", "q": "Wat zijn de 5 fasen van Kübler-Ross?", "a": "Ontkenning, woede, onderhandelen, verdriet, aanvaarding."}, {"id": "86ff9d2b4c21", "section": "Hoorcollege 6: Omgaan met Life Events", "q": "Wat is het kritiek op Kübler-Ross?", "a": "Niet lineair, niet iedereen doorloopt alle fasen, volgorde niet vast."}, {"id": "c692ec0ddd06", "section": "Hoorcollege 6: Omgaan met Life Events", "q": "Wat zijn de 4 rouwtaken van Worden?", "a": "Erkennen, pijn ervaren, aanpassen, verbinden."}, {"id": "0754d92a3690", "section": "Hoorcollege 6: Omgaan met Life Events", "q": "Wat is het Dual Process Model (Stroebe & Schut)?", "a": "Afwisseling tussen verliesgerichte coping (verdriet, gemis) en herstelgerichte coping (leven hervatten) — slingerbeweging."}, {"id": "8489ad8633f1", "section": "Hoorcollege 6: Omgaan met Life Events", "q": "Wat zijn de 5 dimensies van het IPM?", "a": "Fysiek, emotioneel, cognitief, sociaal, spiritueel."}, {"id": "5fb1ce710dc3", "section": "Hoorcollege 6: Omgaan met Life Events", "q": "Wat is global vs. situational meaning (Crystal Park)?", "a": "Global = algemene visie op leven/wereld. Situational = betekenis van specifieke gebeurtenis. Stress = discrepantie."}, {"id": "cafda1441bf2", "section": "Hoorcollege 6: Omgaan met Life Events", "q": "Wat zijn de 3 vormen van sociale steun?", "a": "Materieel, informatief, emotioneel."}, {"id": "d614ea02393f", "section": "Hoorcollege 6: Omgaan met Life Events", "q": "Wat is het verschil tussen herstel en veerkracht?", "a": "Veerkracht = terugveren naar vorig niveau. Herstel = veranderd blijven, leven met kwetsbaarheid (knoop in touw)."}, {"id": "953d8fc83d03", "section": "Hoorcollege 6: Omgaan met Life Events", "q": "Wat betekent CHIME?", "a": "Connectedness, Hope, Identity, Meaning, Empowerment."}, {"id": "add486939224", "section": "Hoorcollege 6: Omgaan met Life Events", "q": "Wat is ervaringsdeskundigheid?", "a": "Hulp op basis van eigen ervaring met psychische problemen/herstel; geeft hoop en herkenning."}, {"id": "49ec52aa7b23", "section": "Hoorcollege 6: Omgaan met Life Events", "q": "Wat zijn de 5 domeinen van posttraumatische groei?", "a": "Relaties, nieuwe mogelijkheden, persoonlijke kracht, spiritualiteit, waardering voor het leven."}, {"id": "5c6008f7c2fc", "section": "Hoorcollege 6: Omgaan met Life Events", "q": "Wat is het verschil tussen veerkracht en PTG?", "a": "Veerkracht = terug naar vorig niveau. PTG = hoger niveau van functioneren dan vóór de gebeurtenis."}, {"id": "1efac5a1dad5", "section": "Hoorcollege 6: Omgaan met Life Events", "q": "Noem 6 kenmerken van stressvolle gebeurtenissen (Lazarus).", "a": "Op handen, onverwacht, onvoorspelbaar, onduidelijk, ongewenst, niet controleerbaar, grote levensverandering."}, {"id": "6723571182e8", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Wat is het verschil tussen eustress en distress?", "a": "Eustress = positieve/productieve spanning; distress = negatieve, belastende spanning."}, {"id": "e71bdfd1680f", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Wat is de HPA-as in het stressysteem?", "a": "Deel van het stressysteem samen met het autonome zenuwstelsel; reguleert stressrespons."}, {"id": "068a5d8ed052", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Wat onderzocht het adolescentievriendschapsartikel naast hechte vriendschappen?", "a": "Sociale acceptatie en populariteit/likeability als voorspellers van later welzijn."}, {"id": "28e417b61137", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Wat is stagediscriminatie?", "a": "Discriminatie die professionals met migratieachtergrond spontaan noemen als stressfactor voor jongeren."}, {"id": "54e885f57f0c", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Welke methode gebruikten onderzoekers bij inclusieve zorg?", "a": "Kwalitatief verkennend; 19 professionals; sneeuwbalmethode; thematische analyse tot saturatie."}, {"id": "1a0560b826b4", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Wat is het mediatiemodel bij de kindergarten-studie?", "a": "Ondersteuning → minder overgangsproblemen → betere ontwikkeling."}, {"id": "a56f3d641341", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Wat is latent class analysis (LCA) in de ECLS-K-studie?", "a": "Methode om scholen te groeperen naar type overgangssteun (minimal/high basic/intensive)."}, {"id": "794fa3b313b2", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Wat toonde de National Child Development Study over pesten?", "a": "Britse cohort vanaf 1958: gepeste kinderen op 7–11 jaar hadden op 50-jarige leeftijd nog meer depressie, minder steun, lagere levenskwaliteit."}, {"id": "c88cf972491a", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Wat is \"Geef de wereld een (t)huis\"?", "a": "Bijkomende vorm van pleegzorg in Vlaanderen."}, {"id": "4d6409be66a3", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Wat is het verschil tussen eerste 1000 dagen en IMH?", "a": "1000 dagen = focus op veilige start vanaf zwangerschap; IMH = bredere psychosociale zorg tot 5 jaar."}, {"id": "b31debf8184e", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Mag euthanasie bij een wilsbekwame minderjarige?", "a": "Ja, met uitdrukkelijke toestemming wettelijke vertegenwoordigers en extra medische adviezen (o.a. kinderpsychiater)."}, {"id": "a08d41aa2980", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Wat is palliatieve sedatie?", "a": "Diepe continue sedatie om ernstig lijden te verlichten; ook \"verlichten van het stervenproces\" genoemd."}, {"id": "9e60222052c8", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Noem 3 niet-medicamenteuze interventies bij depressie in palliatieve zorg.", "a": "Levensverhaal bespreken, muziek-/aromatherapie, gesprekken/counseling (ook ACT, mindfulness)."}, {"id": "6af76fdcb242", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Wie ontwikkelde het CHIME-model en wanneer?", "a": "Leamy et al., 2011."}, {"id": "cb6ce2602f5a", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Wat toonde de meta-analyse van Thomas (2018)?", "a": "Persoonsgericht herstel leidt tot meer herstel, hoop en empowerment; vooral met ervaringsdeskundigen."}, {"id": "9dbe6660a267", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Hoe verloopt het palliatief palet bij borderline?", "a": "Wisselend: positieve activiteiten bij goed functioneren, snel overschakeling naar destructieve activiteiten bij verslechtering."}, {"id": "62a59cca7d9a", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Wat is het verschil tussen centrale en perifere route bij out-group?", "a": "Manieren waarop mensen attitudes vormen t.o.v. out-groups; IAT meet onbewuste associaties."}, {"id": "78d074c0e0fa", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Welke URL gebruikt de positieve gezondheid-vragenlijst?", "a": "vragenlijsten.mijnpositievegezondheid.nl"}, {"id": "6f731f36640a", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Wanneer is moodspace.be extra nuttig?", "a": "Tijdens de examenperiode (studentenwelzijn)."}, {"id": "6c2b4da2b2fc", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Voor welke rouw is Rouwkost geschikt?", "a": "Normale rouwreacties of als aanvulling op begeleiding."}, {"id": "115cb1ee8de9", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Wat is het G × E × C model (Schiele)?", "a": "Genetics × Environment × Coping; coping buffert genetische kwetsbaarheid en stress."}, {"id": "16a0de259e89", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Wat is de triangulatietheorie van Sternberg?", "a": "Drie componenten: intimiteit, passie, toewijding. Alleen intimiteit = iemand leuk vinden; alleen passie = bevlieging; alleen toewijding = lege liefde. Twee componenten: romantische liefde, sociale liefde/gezelschap, dwaze liefde. Alle drie = volmaakte liefde."}, {"id": "97d0ea3ff2a3", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Welke liefdesvorm hoort bij intimiteit + passie volgens Sternberg?", "a": "Romantische liefde."}, {"id": "92b3824b63b4", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Welke liefdesvorm hoort bij alle drie de componenten volgens Sternberg?", "a": "Volmaakte liefde."}, {"id": "9abdc9e5e1ee", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Wat is seksisme?", "a": "Gedrag waarbij iemand of een groep gediscrimineerd wordt op basis van geslacht."}, {"id": "46e82a44925a", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Wat is de kernboodschap van het seksisme-ijsbergmodel?", "a": "Geweld begint soms met een grap — ogenschijnlijk onschuldige seksistische handelingen creëren een klimaat van intimidatie en leiden tot acceptatie van geweld."}, {"id": "16f4cf299f87", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Noem 3 voorbeelden van seksisme \"onder water\" in het ijsbergmodel.", "a": "Seksistische taal en moppen, commentaar op uiterlijk, strikte rollen voor vrouwen en mannen (ook: seksualisering, uitsluiten, onderwaardering, geweld tolereren)."}, {"id": "ccea561bfb8f", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Wat is het moderatiemodel bij kindergarten-overgang?", "a": "Ondersteuning beschermt kinderen tegen negatieve gevolgen van overgangsproblemen (bleek niet significant)."}, {"id": "3df6ba185018", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Wat is Depressed-improved bij Bonanno?", "a": "Kleine groep die zich na partnerverlies beter voelde; zorg vóór overlijden was zeer belastend."}, {"id": "b1613cfb4d59", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Wat zijn preloss-factoren bij rouw?", "a": "Factoren vóór het overlijden (afhankelijkheid, relatiekwaliteit, depressie) die rouwpatroon bepalen."}, {"id": "a20ea4c2ab1a", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Wat is een genderaffirmatieve benadering?", "a": "Respect voor identiteit, autonomie, ondersteuning i.p.v. gatekeeping; mentale zorg als hulp, niet als obstakel."}, {"id": "69fa63bb7f09", "section": "Aanvullende flashcards (PDF-dekking)", "q": "Noem 5 dimensies uit Smith & Lazarus naast motivationele relevantie.", "a": "Motivationele congruentie, verantwoordelijkheid, probleemgerichte coping, emotiegerichte coping, toekomstverwachting."}, {"id": "a12fd3bab3ac", "section": "Digitale Tools (snel)", "q": "Welke tool helpt bij depressie na zwangerschap?", "a": "perinatalehulp.be/zelfhulp"}, {"id": "b916dd5cf484", "section": "Digitale Tools (snel)", "q": "Welke tool is voor vaders van kinderen 0–8 jaar?", "a": "vaderen.be"}, {"id": "afe53cadac32", "section": "Digitale Tools (snel)", "q": "Welke app helpt gescheiden gezinnen met planning en communicatie?", "a": "Keep in Touch Kit"}, {"id": "e53a26d5d53b", "section": "Digitale Tools (snel)", "q": "Welke tool meet positieve gezondheid via een spinnenweb?", "a": "mijnpositievegezondheid.nl"}, {"id": "abc0dad4b69b", "section": "Digitale Tools (snel)", "q": "Welke tool helpt studenten met emotionele problemen en examenstress?", "a": "moodspace.be"}, {"id": "d8615c15ecc1", "section": "Digitale Tools (snel)", "q": "Welke tool biedt lotgenotencontact voor geadopteerden?", "a": "a-buddy.be"}, {"id": "ba001e0ee754", "section": "Digitale Tools (snel)", "q": "Welke tool helpt mantelzorgers inzicht krijgen in bestede zorgtijd?", "a": "waarblijftmijntijd.mantelzorg.nl"}, {"id": "87bed8ae5d92", "section": "Digitale Tools (snel)", "q": "Welke tool is een digitale herinneringsplek voor overledenen?", "a": "mijnherinneringaanjou.be"}, {"id": "ee35f5ca87d8", "section": "Digitale Tools (snel)", "q": "Welke organisatie maakt foto's van sterrenkinderen?", "a": "bovendewolken.be"}, {"id": "5b9856c5ef81", "section": "Digitale Tools (snel)", "q": "Welke tool werkt met de geluksdriehoek (zijn, voelen, omringd)?", "a": "geluksdriehoek.be"}, {"id": "595e3ac75662", "section": "Gemengde examenvragen", "q": "Risicofactor of kwetsbaarheid: wat is het verschil?", "a": "Risicofactor verhoogt kans op problemen; kwetsbaarheid is het onderliggend mechanisme (diathese)."}, {"id": "ef2ecd47bfe4", "section": "Gemengde examenvragen", "q": "Babyblues of postnatale depressie: hoe onderscheid je ze?", "a": "Babyblues: 50–80%, hormonaal, weg na 6 weken, geen aandoening. Depressie: ≥2 weken, 7–15%, significante impact."}, {"id": "c3bafa35d35b", "section": "Gemengde examenvragen", "q": "Set-point of affectieve theorie: welke zegt dat SWB langdurig beïnvloed wordt?", "a": "Affectieve theorie."}, {"id": "17a2b914ae1b", "section": "Gemengde examenvragen", "q": "High basic of intensive school supports: welke werkte beter?", "a": "High basic (info + klasbezoeken). Meer ≠ beter."}, {"id": "747894de65bd", "section": "Gemengde examenvragen", "q": "Resilience of common grief: welke komt vaker voor na partnerverlies?", "a": "Resilience (~46%). Common grief minder vaak dan vroeger gedacht."}, {"id": "a84084afcfcd", "section": "Gemengde examenvragen", "q": "Veerkracht of herstel: welke laat je veranderd?", "a": "Herstel. Veerkracht = terugveren; herstel = leven met sporen (knoop in touw)."}, {"id": "dc022f50d15a", "section": "Gemengde examenvragen", "q": "Verliesgerichte of herstelgerichte coping: wat is afleiding in het DPM?", "a": "Herstelgerichte coping. Afleiding ≠ ontkenning."}, {"id": "8351f79a6b43", "section": "Gemengde examenvragen", "q": "Probleemgerichte of betekenisgerichte coping: welke zoekt lessen in moeilijke situaties?", "a": "Betekenisgerichte coping."}, {"id": "3d62ad5acf1d", "section": "Gemengde examenvragen", "q": "Globale of situationele zingeving: welke ontstaat bij discrepantie?", "a": "Stress ontstaat door discrepantie tussen globale zingeving en situationele zingeving."}, {"id": "03a60a542472", "section": "Gemengde examenvragen", "q": "Formele of informele steun bij kinderverlies: wat noemden 72% als belangrijkste?", "a": "Communicatie binnen het gezin (informele steun)."}];
+    const MC_QUESTIONS = [{"id": "ez-001", "section": "1e zit 2025-2026", "q": "Wat is een correcte uitspraak over de balkmetafoor (kwetsbaarheid-stressmodel)?", "options": ["De stressoren liggen op de balk; de breedte van de balk is voor iedereen universeel hetzelfde.", "De balk staat voor kwetsbaarheid (diathese), gevormd door genetische en omgevingsfactoren; stressoren belasten de balk.", "Als de balk barst, mag de psychologisch consulent zelf behandelen zonder doorverwijzing.", "De metafoor werd ontwikkeld om vooral psychose te verklaren en heeft geen bredere toepassing."], "correct": 1}, {"id": "ez-002", "section": "1e zit 2025-2026", "q": "Welke drie elementen vormen het Sense of Coherence-model (Antonovsky)?", "options": ["Begrijpbaarheid, hanteerbaarheid en betekenisvolheid.", "Intimiteit, passie en toewijding.", "Aandacht, reactie en betekenis.", "Positieve emoties, betrokkenheid en relaties."], "correct": 0}, {"id": "ez-003", "section": "1e zit 2025-2026", "q": "Een kind van 6 jaar met autisme verliest zijn moeder. Welke digitale tool past het best bij rouwondersteuning voor jongeren?", "options": ["a-buddy.be (lotgenotencontact bij adoptie).", "missingyou.be (rouw bij jongeren en jongvolwassenen).", "bovendewolken.be (foto's en ondersteuning rond sterrenkinderen).", "geluksdriehoek.be (werken aan geluk: zijn, voelen, omringd)."], "correct": 1}, {"id": "ez-004", "section": "1e zit 2025-2026", "q": "Volgens Portzky (palliatief palet) en herstel na stress: welke fase is het meest optimaal om in te investeren voor herstel?", "options": ["Drive en spanning (hyperarousal).", "Onderprikkeling en comfort (langdurig freeze).", "Ontspanning (positieve palliatieve activiteiten).", "Comfort alleen, zonder ooit activiteit te hervatten."], "correct": 2}, {"id": "ez-005", "section": "1e zit 2025-2026", "q": "Casus: een vrouw ervaart veel druk op het werk; alles wordt aan haar gevraagd. Ze twijfelt om hulp te vragen. Volgens Lazarus is welk beoordelingspatroon het meest waarschijnlijk?", "options": ["Primaire beoordeling: irrelevant; secundaire: voldoende hulpbronnen.", "Primaire beoordeling: bedreigend; secundaire: voldoende hulpbronnen maar ze zet ze niet in.", "Primaire beoordeling: bedreigend; secundaire: onvoldoende hulpbronnen om ermee om te gaan.", "Primaire beoordeling: uitdaging; secundaire: geen coping nodig."], "correct": 2}, {"id": "ez-006", "section": "1e zit 2025-2026", "q": "Door welke factoren wordt de impact van een life event vooral bepaald (subjectieve benadering)?", "options": ["Alleen de objectieve ernst van de gebeurtenis op de SRRS-schaal.", "Levensgeschiedenis, persoonseigenschappen, hechtingsstijl en gezondheidstoestand.", "Uitsluitend genetische aanleg, onafhankelijk van interpretatie.", "Enkel het macrosysteem en beleid, niet het individu."], "correct": 1}, {"id": "ez-007", "section": "1e zit 2025-2026", "q": "Welke uitspraak over siblingrelaties is correct volgens de cursus?", "options": ["Stief- en halfbroers/-zussen hebben altijd minder conflict dan biologische siblings.", "Conflict is het hoogst in de eerste graad van het middelbaar onderwijs en neemt daarna toe.", "De siblingrelatie kan de langstdurende relatie zijn en blijft bestaan, ook bij weinig contact of zonder emotionele verbinding.", "Siblingrelaties bestaan uit exact vier types: harmonieus, conflictueus, afstandelijk en conflict-intens."], "correct": 2}, {"id": "ez-008", "section": "1e zit 2025-2026", "q": "Welke uitspraak over de polyvagaal theorie is correct?", "options": ["Het ventrale vagale systeem is evolutionair het oudste systeem in de hiërarchie.", "Het dorsale vagale systeem (onderdeel van het autonome zenuwstelsel) kan leiden tot freeze/fawn.", "De drie principes zijn hiërarchie, proprioceptie en dissociatie.", "Het ventrale systeem verhoogt cortisol en zorgt zo voor maximale alertheid."], "correct": 1}, {"id": "ez-009", "section": "1e zit 2025-2026", "q": "Wat is géén wettelijke voorwaarde voor euthanasie bij een terminale, medisch uitzichtloze aandoening?", "options": ["Raadpleging van een tweede arts.", "Vrijwillig, schriftelijk en duurzaam verzoek van de patiënt.", "Een verplichte wachttijd van één maand tussen verzoek en uitvoering.", "Ondraaglijk fysiek of psychisch lijden."], "correct": 2}, {"id": "ez-010", "section": "1e zit 2025-2026", "q": "Artikel over ethische adolescenten en discriminatie: welke uitspraak is correct?", "options": ["Vriendschappen met leeftijdsgenoten met een andere achtergrond bevorderen de ontwikkeling van adolescenten.", "Minstens één contact met iemand met een andere achtergrond hangt samen met minder ervaren discriminatie door leeftijdsgenoten én docenten.", "Discriminatie door leerkrachten heeft hetzelfde effect op schoolprestaties als discriminatie door medestudenten.", "Diversiteit in vriendschappen heeft geen invloed op latere welzijn."], "correct": 1}, {"id": "ez-011", "section": "1e zit 2025-2026", "q": "Een man werkt al 20 jaar bij dezelfde werkgever en ervaart veel stress. Waar kan hij als psychologisch consulent het best naar doorverwijzen?", "options": ["noknok.be (jongeren 12–16 jaar).", "geluksdriehoek.be (psycho-educatie rond geluk: zijn, voelen, omringd).", "veerkrachtverhalen.be (verhalen over veerkracht).", "overkop.be (crisisopvang jongeren)."], "correct": 1}, {"id": "ez-012", "section": "1e zit 2025-2026", "q": "Een man (28 jaar) identificeert zich als transgender en zoekt ondersteuning. Waar kan hij terecht?", "options": ["Casa Rosa (gespecialiseerde ondersteuning rond genderdiversiteit).", "noknok.be (jongeren 12–16 jaar).", "pimento.be (pesten).", "allesoverpesten.be (slachtoffers van pesten)."], "correct": 0}, {"id": "ez-013", "section": "1e zit 2025-2026", "q": "Welke stelling over perinatale gezondheid is correct?", "options": ["De culturele achtergrond van de moeder beïnvloedt hoe zij met postnatale depressie omgaat, wat effect heeft op het kind.", "Psychische problemen komen in de perinatale fase zelden voor (< 1 op 20).", "Postnatale depressie treft uitsluitend biologische moeders, niet partners.", "Baby blues zijn een ernstige psychiatrische stoornis die altijd medicatie vereist."], "correct": 0}, {"id": "ez-014", "section": "1e zit 2025-2026", "q": "Welke term beschrijft het proces van ouder worden met identiteitsvorming, vergelijkbaar met de adolescentie?", "options": ["Matrescentie (voor moeders) / patrescentie (voor vaders).", "Parentificatie (kind neemt ouderrol op).", "Ouderidentificatie (identificatie met eigen ouders).", "Transitie-aanpassing (alleen gedragsaanpassing, geen identiteit)."], "correct": 0}, {"id": "ez-015", "section": "1e zit 2025-2026", "q": "Welke stelling over grootouder worden is correct?", "options": ["Grootouders worden vandaag gemiddeld méér gevraagd dan 20 jaar geleden, zonder spanning.", "Er bestaat een spanningsveld tussen betrokkenheid bij het jonge gezin en het bewaren van eigen autonomie.", "Hoe vaak grootouders hun kleinkind zien, heeft geen invloed op hoe betrokken ze willen zijn.", "Grootouders hebben wettelijk de hoofdverantwoordelijkheid voor de opvoeding."], "correct": 1}, {"id": "ez-016", "section": "1e zit 2025-2026", "q": "Welke drie componenten vormen Sternbergs triangulatietheorie van liefde?", "options": ["Intimiteit, passie en toewijding (commitment).", "Intimiteit, vertrouwen en passie.", "Vertrouwen, passie en engagement.", "Hechting, genegenheid en loyaliteit."], "correct": 0}, {"id": "ez-017", "section": "1e zit 2025-2026", "q": "Welke uitspraak over subjectief welbevinden (SWB) is correct?", "options": ["Een hoger SWB gaat altijd samen met verminderde academische resultaten.", "Volgens de affectieve theorie kunnen life events SWB op lange termijn beïnvloeden.", "Extreem hoog SWB is altijd beter dan matig positief SWB.", "De set-point theorie stelt dat life events permanent SWB verhogen."], "correct": 1}, {"id": "ez-018", "section": "1e zit 2025-2026", "q": "Bij welk type racisme hoort de uitspraak: 'Hij is alleen aangenomen omdat hij van dat ras is'?", "options": ["Structureel racisme (institutioneel beleid).", "Micro-agressie: micro-invalidatie.", "Micro-agressie: micro-belediging.", "Macro-agressie: fysiek geweld."], "correct": 2}, {"id": "ez-019", "section": "1e zit 2025-2026", "q": "Wat is een kernidee van het Integratief Procesmodel (IPM) van rouw?", "options": ["Rouw verloopt lineair in vijf vaste fasen bij iedereen.", "Existentiële spanningen en thema's (bv. dood accepteren, leven omarmen) spelen een centrale rol.", "Rouw is uitsluitend een fysieke dimensie zonder cognitieve component.", "Gecompliceerde rouw komt bij minder dan 1% van de mensen voor."], "correct": 1}, {"id": "ez-020", "section": "1e zit 2025-2026", "q": "Welke stelling over het PERMA-model (Seligman) is fout?", "options": ["PERMA hangt samen met subjectief welbevinden.", "PERMA bestaat uit vier componenten.", "Negatieve emoties kunnen soms functioneel zijn.", "PERMA omvat onder meer betekenis (Meaning) en prestatie (Achievement)."], "correct": 1}, {"id": "ez-021", "section": "1e zit 2025-2026", "q": "Een leerkracht wil pesten in de klas aanpakken. Welke tool past het best?", "options": ["pimento.be (hulpverleners en pesten).", "moodspace.be (studentenwelzijn).", "bovendewolken.be (foto's sterrenkinderen).", "druglijn.be/grip (KOPP-kinderen)."], "correct": 0}, {"id": "ez-022", "section": "1e zit 2025-2026", "q": "Artikel over ouderen en rouwen: welke uitspraak is correct?", "options": ["Ouderen ervaren bij rouw eenzaamheid; LGBTQ-vrouwen en oudere vrouwen voelen vaker isolatie.", "Rouw bij ouderen heeft nooit invloed op fysieke gezondheid.", "Ouderen rouwen altijd sneller dan jongere volwassenen.", "Professionele hulp is bij ouderenrouw contraproductief."], "correct": 0}, {"id": "ez-023", "section": "1e zit 2025-2026", "q": "Welke uitspraak over het kwetsbaarheid-stressmodel is correct?", "options": ["Het model werd oorspronkelijk ontwikkeld in onderzoek naar psychotische episodes (Zubin & Spring).", "Stress alleen is voldoende om psychopathologie te verklaren.", "Kwetsbaarheid en risicofactor zijn exact hetzelfde begrip.", "Coping is aangeboren en niet trainbaar."], "correct": 0}, {"id": "ez-024", "section": "1e zit 2025-2026", "q": "Een transgender persoon heeft negatieve gevoelens tegenover zichzelf. Welke proximale factor is dit?", "options": ["Geïnternaliseerde transfobie.", "Non-affirmatie door de omgeving.", "Non-disclosure (niet out zijn).", "Externe victimisatie (uitsluitend fysiek geweld)."], "correct": 0}, {"id": "ez-025", "section": "1e zit 2025-2026", "q": "Welke uitspraak over het AREA-model (Wilson & Gilbert) is correct?", "options": ["AREA staat voor: Aandacht, Reactie, Externe factoren, Aanhouden.", "Betekenisgeving is cruciaal in dit model voor het vormen van veerkracht.", "Het model stelt dat appraisals geen rol spelen bij life events.", "AREA vervangt volledig het kwetsbaarheid-stressmodel."], "correct": 1}, {"id": "ez-026", "section": "1e zit 2025-2026", "q": "Volgens het transgender-hoofdstuk (chapter 18): welke aanbeveling is correct rond chirurgie?", "options": ["Rookstop moet worden ingelast vóór genderbevestigende chirurgie.", "Conversietherapie moet standaard worden aangeraden.", "Psychotherapie is altijd verplicht vóór elke hormoonbehandeling.", "Een verplichte hormoonstop van één jaar is wettelijk voorgeschreven."], "correct": 0}, {"id": "ez-027", "section": "1e zit 2025-2026", "q": "Iemand werkt in een job onder zijn/haar diploma-niveau. Hoe heet dit in arbeidsmarktterminologie?", "options": ["Ondertewerkstelling (niveau onder tewerkstelling).", "Overwerkstelling (meer verantwoordelijkheid dan diploma).", "Domein-tewerkstelling (andere sector dan opleiding).", "Structurele werkloosheid."], "correct": 0}, {"id": "ez-028", "section": "1e zit 2025-2026", "q": "Welke uitspraak over baby blues is correct?", "options": ["Baby blues duren typisch tot ongeveer de zesde week na de bevalling en zijn geen psychiatrische stoornis.", "Baby blues treffen minder dan 5% van de moeders.", "Baby blues vereisen altijd opname op een psychiatrische afdeling.", "Baby blues en postnatale depressie zijn hetzelfde."], "correct": 0}, {"id": "ez-029", "section": "1e zit 2025-2026", "q": "Artikel over pesten (Pabian e.a.): welke uitspraak is correct?", "options": ["De subjectieve ervaring van pesten heeft invloed op mentale gezondheid op lange termijn.", "Pesten in de kindertijd heeft geen effect meer na het 18de levensjaar.", "Alleen fysiek pesten telt mee; relationeel pesten niet.", "Pesten beïnvloedt uitsluitend schoolcijfers, niet welzijn."], "correct": 0}, {"id": "ez-030", "section": "1e zit 2025-2026", "q": "Artikel over burn-out bij studenten: wat is een belangrijk risicofactor?", "options": ["Overmatig internetgebruik.", "Hoge intrinsieke motivatie zonder stress.", "Regelmatige lichaamsbeweging.", "Sterk sociaal netwerk op campus."], "correct": 0}, {"id": "ez-031", "section": "1e zit 2025-2026", "q": "Wat is palliatieve zorg?", "options": ["Een holistische benadering die kwaliteit van leven verbetert door vroegtijdige herkenning en behandeling van lijden (fysiek, psychosociaal, spiritueel).", "Een zorgtraject dat pas start als alle curatieve behandelingen zijn stopgezet.", "Uitsluitend pijnbestrijding zonder aandacht voor psychosociale aspecten.", "Behandeling die als doel heeft de dood te bespoedigen."], "correct": 0}, {"id": "ez-032", "section": "1e zit 2025-2026", "q": "Welke factoren droegen bij aan veerkracht bij zowel jonge vluchtelingen in Ethiopië als bij migranten in Europa (cursus)?", "options": ["Sociale contacten, bijdragen aan de maatschappij en betaald werk.", "Uitsluitend contact met het thuisland.", "Alleen school, zonder sociale steun.", "Vrijwilligerswerk alleen, zonder werk of school."], "correct": 0}, {"id": "ez-033", "section": "1e zit 2025-2026", "q": "Een vrouw van 80 woont in Gent en heeft weinig sociale contacten. Waar kan ze terecht voor sociale ondersteuning?", "options": ["Rits Artevelde (sociale contacten voor ouderen in de regio).", "noknok.be (jongeren 12–16 jaar).", "moodspace.be (studentenwelzijn).", "pimento.be (pesten)."], "correct": 0}, {"id": "ez-034", "section": "1e zit 2025-2026", "q": "Na de dood van zijn vader wil een jongen gaan basketten en lijkt minder verdrietig dan moeder en zus. Wat is correct?", "options": ["Dit is een normale reactie: kinderen zijn niet continu bezig met verlies en zoeken ook afleiding.", "Dit wijst altijd op pathologische ontkenning en vereist direct crisisopvang.", "Kinderen mogen pas spelen na minstens één jaar rouw.", "Kinderen voelen nooit verdriet bij het verlies van een ouder."], "correct": 0}, {"id": "ez-035", "section": "1e zit 2025-2026", "q": "Welk rouwpatroon kwam het meest voor bij mensen die hun partner verloren (Bonanno et al.)?", "options": ["Chronische rouw (langdurige intense rouw bij iedereen).", "Een stabiel patroon van relatief lage depressie met veerkracht (resilience).", "Klassieke rouw: eerst een dip, daarna geleidelijk herstel bij iedereen.", "Uitgestelde rouw (delayed grief) bij de meerderheid."], "correct": 1}, {"id": "ez-036", "section": "1e zit 2025-2026", "q": "Artikel over ouderen en rouwen: welke bijkomende uitspraak is correct?", "options": ["Door rouw kunnen meer gezondheidsproblemen ontstaan.", "Rouw beschermt altijd tegen fysieke klachten.", "Ouderen hebben geen behoefte aan sociale steun bij verlies.", "Rouw bij ouderen is altijd kortdurend (< 2 weken)."], "correct": 0}, {"id": "ez-037", "section": "1e zit 2025-2026", "q": "Welke uitspraak over het AREA-model is eveneens correct?", "options": ["Betekenisgeving kan worden beïnvloed door persoonlijke attributies en omgevingsfactoren.", "Het model stelt dat externe factoren geen rol spelen bij appraisals.", "AREA betekent: Aandacht, Reactie, Emotie, Aanpassing.", "Het model werd ontwikkeld door Antonovsky."], "correct": 0}, {"id": "ez-038", "section": "1e zit 2025-2026", "q": "Een psychologisch consulent mag bij complexe rouw bij een kind met autisme niet alles alleen. Wat is de juiste eerste stap?", "options": ["Doorverwijzen naar gespecialiseerde hulp naast eventuele digitale ondersteuning (bv. missingyou.be).", "Zelf langdurige traumatherapie starten zonder overleg.", "Afwachten tot het kind zelf hulp vraagt.", "Het kind doorsturen naar geluksdriehoek.be."], "correct": 0}, {"id": "sup-001", "section": "Hoorcollege 1: Inleiding", "q": "Welke uitspraak over de balkmetafoor en draaglast/draagkracht is juist?", "options": ["Draaglast = stressoren; draagkracht = coping, steun en energie.", "Draaglast = genetica; draagkracht = stressoren.", "Als draaglast gelijk is aan draagkracht ontstaat altijd psychopathologie.", "De metafoor meet stress uitsluitend met de SRRS."], "correct": 0}, {"id": "sup-002", "section": "Hoorcollege 1: Inleiding", "q": "Wanneer ontstaat stress volgens Lazarus?", "options": ["Bij elke life event, ongeacht beoordeling.", "Wanneer de situatie als bedreigend/belangrijk wordt beoordeeld én iemand onvoldoende hulpbronnen heeft.", "Alleen bij catastrofes, niet bij dagelijkse ergernissen.", "Uitsluitend wanneer de primaire beoordeling 'uitdaging' is."], "correct": 1}, {"id": "sup-003", "section": "Hoorcollege 1: Inleiding", "q": "Welke volgorde in de polyvagaal hiërarchie is correct (van meest adaptief naar minst adaptief)?", "options": ["Ventral vagale → sympathisch → dorsaal vagale.", "Dorsaal vagale → sympathisch → ventral vagale.", "Sympathisch → dorsaal vagale → ventral vagale.", "Ventral vagale → dorsaal vagale → sympathisch."], "correct": 0}, {"id": "sup-004", "section": "Hoorcollege 2: Ouderschap", "q": "Wat is het verschil tussen baby blues en postnatale depressie?", "options": ["Baby blues: kortdurend (dagen tot ~6 weken), geen stoornis; postnatale depressie: minstens 2 weken, klinisch relevant.", "Baby blues treft 1 op 20 moeders; postnatale depressie is zeldzamer.", "Baby blues vereist antidepressiva; postnatale depressie niet.", "Er is geen verschil; het zijn synoniemen."], "correct": 0}, {"id": "sup-005", "section": "Hoorcollege 2: Ouderschap", "q": "Wat is parentificatie?", "options": ["Een kind neemt (te vroeg) ouderlijke taken of zorg voor ouders/broers/zussen op.", "De transitie naar ouderschap met identiteitsheroriëntatie.", "Het verlies van een kind tijdens zwangerschap.", "Wettelijke adoptie door grootouders."], "correct": 0}, {"id": "sup-006", "section": "Hoorcollege 3: Relaties", "q": "Welke liefdesvorm hoort bij intimiteit + passie volgens Sternberg?", "options": ["Romantische liefde.", "Lege liefde.", "Sociale liefde / gezelschap.", "Volmaakte liefde."], "correct": 0}, {"id": "sup-007", "section": "Hoorcollege 3: Relaties", "q": "Wat is seksisme volgens de cursus?", "options": ["Gedrag waarbij iemand of een groep wordt gediscrimineerd op basis van geslacht.", "Elke vorm van ongelijkheid, ongeacht criterium.", "Uitsluitend fysiek geweld tegen vrouwen.", "Het verschil tussen sekse en gender."], "correct": 0}, {"id": "sup-008", "section": "Hoorcollege 3: Relaties", "q": "Is transgender zijn een psychische aandoening volgens de gendermodule?", "options": ["Nee; hogere psychische klachten hangen samen met minority stress.", "Ja; het staat in DSM-5 als primaire diagnose.", "Ja; psychotherapie is altijd verplicht vóór elke zorg.", "Nee; transgender personen hebben nooit psychische klachten."], "correct": 0}, {"id": "sup-009", "section": "Hoorcollege 4: School & Werk", "q": "Welke tool is een aanrader voor studentenwelzijn in de examenperiode?", "options": ["moodspace.be", "bovendewolken.be", "waarblijftmijntijd.mantelzorg.nl", "vaderen.be"], "correct": 0}, {"id": "sup-010", "section": "Hoorcollege 4: School & Werk", "q": "Wat toonde het longitudinale pesten-onderzoek (Britse cohort)?", "options": ["Gepeste kinderen (7–11 jaar) hadden op 50-jarige leeftijd nog meer depressie en lagere levenskwaliteit.", "Pesten heeft geen effect na het verlaten van de lagere school.", "Alleen meisjes worden langdurig beïnvloed door pesten.", "Pesten verhoogt uitsluitend angst, niet depressie."], "correct": 0}, {"id": "sup-011", "section": "Hoorcollege 5: Verlies", "q": "Welk rouwpatroon werd amper gevonden door Bonanno et al.?", "options": ["Delayed grief (uitgestelde rouw).", "Resilience (veerkracht).", "Common grief.", "Chronic depression."], "correct": 0}, {"id": "sup-012", "section": "Hoorcollege 5: Verlies", "q": "Wat is géén wettelijke voorwaarde voor euthanasie?", "options": ["Een verplichte wachttijd van één maand bij een terminale aandoening.", "Wilsbekwaamheid van de patiënt.", "Ondraaglijk lijden.", "Schriftelijk verzoek (voor meerderjarigen)."], "correct": 0}, {"id": "sup-013", "section": "Hoorcollege 6: Omgaan met Life Events", "q": "Wat betekent AREA?", "options": ["Attent → React → Explain → Adapt.", "Aandacht, Reactie, Emotie, Aanpassing.", "Appraisal, Resilience, Emotie, Acceptatie.", "Aanvaarden, Rouwen, Evalueren, Aanpassen."], "correct": 0}, {"id": "sup-014", "section": "Hoorcollege 6: Omgaan met Life Events", "q": "Wat is het palliatief palet (Portzky)?", "options": ["Alle activiteiten om stress/negatieve gevoelens tijdelijk te verminderen; van positief tot destructief.", "Alleen medicamenteuze pijnbestrijding in palliatieve zorg.", "Een lijst van toegestane euthanasie-indicaties.", "Het verschil tussen rouw en depressie."], "correct": 0}, {"id": "sup-015", "section": "Hoorcollege 6: Omgaan met Life Events", "q": "Wat stelt het Dual Process Model (DPM) van rouw?", "options": ["Afwisseling tussen verliesgerichte en herstelgerichte coping.", "Rouw verloopt strikt lineair in vijf fasen.", "Rouw duurt maximaal zes maanden.", "Herstel betekent volledig vergeten van de overledene."], "correct": 0}, {"id": "sup-016", "section": "Digitale Tools", "q": "Welke tool past bij foto's van sterrenkinderen na perinataal verlies?", "options": ["bovendewolken.be", "missingyou.be", "geluksdriehoek.be", "a-buddy.be"], "correct": 0}, {"id": "sup-017", "section": "Digitale Tools", "q": "Waarvoor dient perinatalehulp.be/zelfhulp?", "options": ["Zelfhulptraject bij depressie na zwangerschap (~10 weken).", "Crisisopvang voor jongeren 12–16 jaar.", "Pesten in het secundair onderwijs.", "Burn-out bij zorgverleners."], "correct": 0}, {"id": "sup-018", "section": "Hoorcollege 1: Inleiding", "q": "Welke beperking van de SRRS (Holmes & Rahe) is correct?", "options": ["Subjectieve interpretatie en culturele context worden niet meegenomen.", "De schaal meet alleen dagelijkse ergernissen.", "De schaal is alleen geldig voor kinderen.", "De schaal houdt geen rekening met cumulatie van events."], "correct": 0}, {"id": "sup-019", "section": "Hoorcollege 3: Relaties", "q": "Wat toonde de Jane Elliott blue eyes/brown eyes-oefening?", "options": ["Vooroordelen kunnen snel ontstaan; wie discriminatie ondervond, discrimineert minder snel zelf.", "Discriminatie is alleen biologisch bepaald.", "Kinderen hebben geen in-group voorkeur.", "Racisme is uitsluitend bewust en opzettelijk."], "correct": 0}, {"id": "sup-020", "section": "Hoorcollege 5: Verlies", "q": "Wat zijn bronnen van veerkracht bij jonge vluchtelingen in Ethiopië?", "options": ["Sociale steun, school, werk en zinvolle activiteiten.", "Uitsluitend religie, zonder sociale contacten.", "Isolatie van de lokale gemeenschap.", "Vermijden van onderwijs om stress te verlagen."], "correct": 0}];
+    const STORAGE_CARDS = 'life_events_cards_custom';
+    const STORAGE_FC = 'life_events_fc_known';
+    const STORAGE_FC_PROGRESS = 'life_events_fc_progress';
+    const STORAGE_CL = 'life_events_checklist';
+    const STORAGE_EXAM_HISTORY = 'life_events_exam_history';
+    const EXAM_HISTORY_MAX = 50;
+    const FC_REQUEUE_GOOD = 5;
+    const FC_REQUEUE_BAD = 2;
+    const FC_WEAK_THRESHOLD = 2;
+
+    let CARDS = loadCards();
+    let fcProgress = loadFcProgress();
+    let queue = [];
+    let index = 0;
+    let filterSection = 'all';
+    let weakStudyMode = false;
+    let listVisible = false;
+    let fcFullscreen = false;
+    let editingId = null;
+    let editorFilterSection = 'all';
+    let editorSearch = '';
+
+    function loadFcProgress() {
+      try {
+        const raw = localStorage.getItem(STORAGE_FC_PROGRESS);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === 'object') return parsed;
+        }
+      } catch (e) {}
+      const legacy = JSON.parse(localStorage.getItem(STORAGE_FC) || '[]');
+      const migrated = {};
+      legacy.forEach(id => {
+        migrated[id] = { state: 'mastered', fails: 0 };
+      });
+      return migrated;
+    }
+
+    function getCardProgress(id) {
+      if (!fcProgress[id]) fcProgress[id] = { state: 'new', fails: 0 };
+      return fcProgress[id];
+    }
+
+    function isMastered(id) {
+      return getCardProgress(id).state === 'mastered';
+    }
+
+    function saveFcProgress() {
+      localStorage.setItem(STORAGE_FC_PROGRESS, JSON.stringify(fcProgress));
+      const mastered = Object.entries(fcProgress)
+        .filter(([, p]) => p.state === 'mastered')
+        .map(([id]) => id);
+      localStorage.setItem(STORAGE_FC, JSON.stringify(mastered));
+      updateStats();
+    }
+
+    function loadCards() {
+      try {
+        const saved = localStorage.getItem(STORAGE_CARDS);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length) return parsed;
+        }
+      } catch (e) {}
+      return JSON.parse(JSON.stringify(DEFAULT_CARDS));
+    }
+
+    function saveCards(showToast = true) {
+      localStorage.setItem(STORAGE_CARDS, JSON.stringify(CARDS));
+      rebuildFcNav();
+      document.getElementById('tab-fc-count').textContent = CARDS.length;
+      updateStats();
+      if (showToast) showSaved();
+    }
+
+    function showSaved() {
+      const t = document.getElementById('save-toast');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 1600);
+    }
+
+    function cardKey(c) { return c.id; }
+
+    function newId() {
+      return 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    }
+
+    function getSections() {
+      return [...new Set(CARDS.map(c => c.section))].sort();
+    }
+
+    function rebuildFcNav() {
+      const nav = document.getElementById('fc-nav');
+      const sections = getSections();
+      nav.innerHTML = `<button class="filter-btn active" data-section="all">Alle (${CARDS.length})</button>` +
+        sections.map(s => {
+          const n = CARDS.filter(c => c.section === s).length;
+          const label = s.includes(':') ? s.split(':')[0] : s;
+          return `<button class="filter-btn" data-section="${escapeAttr(s)}">${label} (${n})</button>`;
+        }).join('');
+      nav.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          nav.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          filterSection = btn.dataset.section;
+          weakStudyMode = false;
+          applyFilter();
+          updateWeakStudyButtons();
+        });
+      });
+      if (filterSection !== 'all' && !sections.includes(filterSection)) filterSection = 'all';
+    }
+
+    function escapeAttr(s) {
+      return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // Tabs
+    const tabs = document.querySelectorAll('.tab');
+    const panels = document.querySelectorAll('.panel');
+    const guideNav = document.getElementById('guide-nav');
+    const fcNav = document.getElementById('fc-nav');
+    const editorNav = document.getElementById('editor-nav');
+    const examNav = document.getElementById('exam-nav');
+    const mindmapNav = document.getElementById('mindmap-nav');
+    const sidebarTitle = document.getElementById('sidebar-title');
+    const MM_DEFAULT_ID = "hc1";
+
+    function switchPanel(name) {
+      tabs.forEach(t => t.classList.toggle('active', t.dataset.panel === name));
+      panels.forEach(p => p.classList.remove('active'));
+      document.getElementById('panel-' + name).classList.add('active');
+      guideNav.style.display = name === 'guide' ? 'block' : 'none';
+      fcNav.style.display = name === 'flashcards' ? 'block' : 'none';
+      editorNav.style.display = name === 'editor' ? 'block' : 'none';
+      examNav.style.display = name === 'exam' ? 'block' : 'none';
+      mindmapNav.style.display = name === 'mindmaps' ? 'block' : 'none';
+      if (name === 'guide') sidebarTitle.textContent = 'Navigatie';
+      else if (name === 'flashcards') sidebarTitle.textContent = 'Filter';
+      else if (name === 'editor') { sidebarTitle.textContent = 'Onderwerp'; renderEditorList(); }
+      else if (name === 'exam') { sidebarTitle.textContent = 'Oefenexamen'; renderExamHistory(); showExamView('start'); }
+      else if (name === 'mindmaps') { sidebarTitle.textContent = 'Mindmaps'; showMindmap(currentMmId || MM_DEFAULT_ID); }
+      else sidebarTitle.textContent = '';
+    }
+
+    tabs.forEach(tab => tab.addEventListener('click', () => switchPanel(tab.dataset.panel)));
+
+    document.querySelectorAll('#editor-nav .filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#editor-nav .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        editorFilterSection = btn.dataset.editorSection;
+        renderEditorList();
+      });
+    });
+
+    function saveKnown() { saveFcProgress(); }
+
+    function filteredPool() {
+      return filterSection === 'all' ? CARDS : CARDS.filter(c => c.section === filterSection);
+    }
+
+    function buildQueue(shuffle = false) {
+      const pool = filteredPool();
+      if (weakStudyMode) {
+        queue = pool.filter(c => {
+          const p = getCardProgress(cardKey(c));
+          return p.fails >= FC_WEAK_THRESHOLD && p.state !== 'mastered';
+        });
+      } else {
+        queue = pool.filter(c => !isMastered(cardKey(c)));
+      }
+      if (shuffle) {
+        for (let i = queue.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [queue[i], queue[j]] = [queue[j], queue[i]];
+        }
+      }
+      if (!queue.length) index = 0;
+      else if (index >= queue.length) index = 0;
+    }
+
+    function applyFilter() {
+      buildQueue(false);
+      renderCard();
+      updateStats();
+      renderList();
+      renderWeakList();
+      updateWeakStudyButtons();
+    }
+
+    function updateWeakStudyButtons() {
+      const weakCount = getWeakCards().length;
+      const btnWeak = document.getElementById('btn-study-weak');
+      const btnAll = document.getElementById('btn-study-all');
+      btnWeak.style.display = !weakStudyMode && weakCount > 0 ? 'inline-block' : 'none';
+      btnAll.style.display = weakStudyMode ? 'inline-block' : 'none';
+    }
+
+    function getWeakCards() {
+      return CARDS.filter(c => {
+        const p = getCardProgress(cardKey(c));
+        return p.fails >= FC_WEAK_THRESHOLD;
+      }).sort((a, b) => getCardProgress(cardKey(b)).fails - getCardProgress(cardKey(a)).fails);
+    }
+
+    function renderWeakList() {
+      const list = document.getElementById('fc-weak-list');
+      const weak = getWeakCards();
+      if (!weak.length) {
+        list.innerHTML = '<p class="fc-weak-empty">Nog geen kaarten met meerdere fouten — goed bezig!</p>';
+        return;
+      }
+      list.innerHTML = weak.map(c => {
+        const p = getCardProgress(cardKey(c));
+        const mastered = p.state === 'mastered' ? ' · beheerst' : '';
+        return `<div class="fc-weak-item" data-id="${c.id}">
+          <div><span class="tag">${escapeHtml(c.section)}</span> ${escapeHtml(c.q)}${mastered}</div>
+          <span class="fail-count">${p.fails}× fout</span>
+        </div>`;
+      }).join('');
+      list.querySelectorAll('.fc-weak-item').forEach(el => {
+        el.addEventListener('click', () => {
+          const card = CARDS.find(c => c.id === el.dataset.id);
+          if (!card) return;
+          weakStudyMode = false;
+          filterSection = card.section;
+          rebuildFcNav();
+          buildQueue(false);
+          const idx = queue.findIndex(c => c.id === card.id);
+          if (idx < 0) {
+            queue = [card, ...queue];
+            index = 0;
+          } else index = idx;
+          renderCard();
+          updateWeakStudyButtons();
+          document.getElementById('fc-stage').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      });
+    }
+
+    function renderCard() {
+      const card = document.getElementById('flashcard');
+      card.classList.remove('flipped');
+      if (!queue.length) {
+        document.getElementById('fc-question').textContent = weakStudyMode
+          ? 'Geen zwakke kaarten meer in deze selectie — goed gedaan!'
+          : 'Alle kaarten in deze selectie zijn beheerst!';
+        document.getElementById('fc-answer').textContent = weakStudyMode
+          ? 'Klik op "Terug naar alle kaarten" om verder te oefenen.'
+          : 'Kies een ander filter of reset de voortgang om opnieuw te starten.';
+        document.getElementById('fc-section').textContent = '';
+        document.getElementById('fc-section-back').textContent = '';
+        document.getElementById('fc-status-badge').textContent = '';
+        document.getElementById('fc-status-badge-back').textContent = '';
+        return;
+      }
+      const c = queue[index];
+      const p = getCardProgress(cardKey(c));
+      document.getElementById('fc-section').textContent = c.section;
+      document.getElementById('fc-section-back').textContent = c.section;
+      document.getElementById('fc-question').textContent = c.q;
+      document.getElementById('fc-answer').textContent = c.a;
+      let badge = '';
+      if (p.state === 'confirm') {
+        badge = '↻ Nog 1× op Enter = echt beheerst';
+      } else if (p.fails >= FC_WEAK_THRESHOLD) {
+        badge = '⚠ ' + p.fails + '× eerder fout — extra oefenen';
+      }
+      document.getElementById('fc-status-badge').textContent = badge;
+      document.getElementById('fc-status-badge-back').textContent = badge;
+    }
+
+    function updateStats() {
+      const pool = filteredPool();
+      const total = pool.length || 1;
+      const mastered = pool.filter(c => isMastered(cardKey(c))).length;
+      const confirm = pool.filter(c => getCardProgress(cardKey(c)).state === 'confirm').length;
+      const remaining = pool.filter(c => !isMastered(cardKey(c))).length;
+      document.getElementById('fc-stats').textContent =
+        mastered + ' / ' + pool.length + ' beheerst in deze selectie';
+      document.getElementById('fc-progress-fill').style.width = (mastered / total * 100) + '%';
+      document.getElementById('fc-progress-fill').classList.toggle('confirm', confirm > 0 && mastered < pool.length);
+      const statsEl = document.getElementById('fc-session-stats');
+      statsEl.innerHTML =
+        '<span><strong>' + remaining + '</strong> nog te leren</span>' +
+        '<span><strong>' + confirm + '</strong> wacht op bevestiging</span>' +
+        '<span><strong>' + queue.length + '</strong> in wachtrij</span>' +
+        (queue.length ? '<span>Kaart <strong>' + (index + 1) + '</strong> / ' + queue.length + '</span>' : '');
+    }
+
+    function nextCard() {
+      if (!queue.length) return;
+      index = (index + 1) % queue.length;
+      renderCard();
+    }
+
+    function prevCard() {
+      if (!queue.length) return;
+      index = (index - 1 + queue.length) % queue.length;
+      renderCard();
+    }
+
+    function flipCard() {
+      document.getElementById('flashcard').classList.toggle('flipped');
+    }
+
+    function isCardFlipped() {
+      return document.getElementById('flashcard').classList.contains('flipped');
+    }
+
+    function requeueCard(offset) {
+      const card = queue.splice(index, 1)[0];
+      const insertAt = Math.min(index + offset, queue.length);
+      queue.splice(insertAt, 0, card);
+      if (index >= queue.length) index = 0;
+    }
+
+    function rateGood() {
+      if (!queue.length) return;
+      if (!isCardFlipped()) { flipCard(); return; }
+      const c = queue[index];
+      const key = cardKey(c);
+      const p = getCardProgress(key);
+      if (p.state === 'confirm') {
+        p.state = 'mastered';
+        saveFcProgress();
+        queue.splice(index, 1);
+        if (index >= queue.length) index = 0;
+      } else {
+        p.state = 'confirm';
+        saveFcProgress();
+        requeueCard(FC_REQUEUE_GOOD);
+      }
+      renderCard();
+      updateStats();
+      renderList();
+      renderWeakList();
+      updateWeakStudyButtons();
+    }
+
+    function rateBad() {
+      if (!queue.length) return;
+      if (!isCardFlipped()) { flipCard(); return; }
+      const c = queue[index];
+      const key = cardKey(c);
+      const p = getCardProgress(key);
+      p.fails = (p.fails || 0) + 1;
+      p.state = 'new';
+      saveFcProgress();
+      requeueCard(FC_REQUEUE_BAD);
+      renderCard();
+      updateStats();
+      renderList();
+      renderWeakList();
+      updateWeakStudyButtons();
+    }
+
+    function toggleFcFullscreen() {
+      fcFullscreen = !fcFullscreen;
+      const stage = document.getElementById('fc-stage');
+      stage.classList.toggle('fullscreen', fcFullscreen);
+      document.body.style.overflow = fcFullscreen ? 'hidden' : '';
+      document.getElementById('btn-fc-fullscreen').textContent = fcFullscreen ? '✕ Sluit groot scherm' : '⛶ Groot scherm';
+    }
+
+    document.getElementById('flashcard').addEventListener('click', flipCard);
+    document.getElementById('btn-next').addEventListener('click', nextCard);
+    document.getElementById('btn-prev').addEventListener('click', prevCard);
+    document.getElementById('btn-easy').addEventListener('click', rateGood);
+    document.getElementById('btn-hard').addEventListener('click', rateBad);
+    document.getElementById('btn-fc-fullscreen').addEventListener('click', toggleFcFullscreen);
+
+    document.getElementById('btn-shuffle').addEventListener('click', () => {
+      buildQueue(true);
+      index = 0;
+      renderCard();
+      updateStats();
+    });
+
+    document.getElementById('btn-reset-progress').addEventListener('click', () => {
+      if (confirm('Alle leervoortgang wissen? (Kaarten en foutentelling blijven, maar alles wordt opnieuw geoefend)')) {
+        fcProgress = {};
+        localStorage.removeItem(STORAGE_FC_PROGRESS);
+        localStorage.removeItem(STORAGE_FC);
+        weakStudyMode = false;
+        buildQueue(true);
+        index = 0;
+        saveFcProgress();
+        renderList();
+        renderWeakList();
+        renderCard();
+        updateWeakStudyButtons();
+      }
+    });
+
+    document.getElementById('btn-study-weak').addEventListener('click', () => {
+      weakStudyMode = true;
+      buildQueue(true);
+      index = 0;
+      renderCard();
+      updateStats();
+      updateWeakStudyButtons();
+      document.getElementById('fc-stage').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    document.getElementById('btn-study-all').addEventListener('click', () => {
+      weakStudyMode = false;
+      buildQueue(false);
+      index = 0;
+      renderCard();
+      updateStats();
+      updateWeakStudyButtons();
+    });
+
+    document.getElementById('btn-edit-current').addEventListener('click', () => {
+      if (!queue.length) return;
+      openEditorForCard(queue[index].id);
+      switchPanel('editor');
+    });
+
+    function renderList() {
+      const list = document.getElementById('fc-list');
+      const items = filteredPool();
+      list.innerHTML = items.map(c => {
+        const p = getCardProgress(cardKey(c));
+        let cls = '';
+        if (p.state === 'mastered') cls = 'done';
+        const failTag = p.fails >= FC_WEAK_THRESHOLD ? ` · ${p.fails}× fout` : '';
+        const confirmTag = p.state === 'confirm' ? ' · bevestigen' : '';
+        return `<div class="fc-list-item ${cls}" data-id="${c.id}">
+          <span class="tag">${escapeHtml(c.section)}</span>${escapeHtml(c.q)}${failTag}${confirmTag}
+        </div>`;
+      }).join('');
+      list.querySelectorAll('.fc-list-item').forEach(el => {
+        el.addEventListener('click', () => {
+          const idx = queue.findIndex(c => c.id === el.dataset.id);
+          if (idx >= 0) {
+            index = idx;
+            renderCard();
+            if (listVisible) window.scrollTo({ top: document.getElementById('fc-wrap').offsetTop - 80, behavior: 'smooth' });
+          }
+        });
+      });
+    }
+
+    document.getElementById('btn-show-list').addEventListener('click', () => {
+      listVisible = !listVisible;
+      document.getElementById('fc-list').style.display = listVisible ? 'grid' : 'none';
+      document.getElementById('btn-show-list').textContent = listVisible ? 'Verberg lijst' : 'Toon alle kaarten';
+      if (listVisible) renderList();
+    });
+
+    // Editor
+    function filteredEditorCards() {
+      let list = editorFilterSection === 'all' ? CARDS : CARDS.filter(c => c.section === editorFilterSection);
+      const q = editorSearch.trim().toLowerCase();
+      if (q) list = list.filter(c => c.q.toLowerCase().includes(q) || c.a.toLowerCase().includes(q) || c.section.toLowerCase().includes(q));
+      return list;
+    }
+
+    function renderEditorList() {
+      const list = document.getElementById('editor-list');
+      const items = filteredEditorCards();
+      if (!items.length) {
+        list.innerHTML = '<div class="editor-empty">Geen kaarten gevonden.</div>';
+        return;
+      }
+      list.innerHTML = items.map(c => `
+        <button type="button" class="editor-list-item ${c.id === editingId ? 'active' : ''}" data-id="${c.id}">
+          <span class="tag">${escapeHtml(c.section)}</span>${escapeHtml(c.q)}
+        </button>`).join('');
+      list.querySelectorAll('.editor-list-item').forEach(el => {
+        el.addEventListener('click', () => openEditorForCard(el.dataset.id));
+      });
+    }
+
+    function openEditorForCard(id) {
+      const card = CARDS.find(c => c.id === id);
+      if (!card) return;
+      editingId = id;
+      document.getElementById('editor-form-empty').style.display = 'none';
+      document.getElementById('editor-form-fields').style.display = 'block';
+      document.getElementById('editor-form-title').textContent = 'Kaart bewerken';
+      document.getElementById('edit-section').value = card.section;
+      document.getElementById('edit-question').value = card.q;
+      document.getElementById('edit-answer').value = card.a;
+      renderEditorList();
+    }
+
+    function readEditorForm() {
+      return {
+        section: document.getElementById('edit-section').value.trim() || 'Eigen kaarten',
+        q: document.getElementById('edit-question').value.trim(),
+        a: document.getElementById('edit-answer').value.trim(),
+      };
+    }
+
+    function saveEditorCard() {
+      const data = readEditorForm();
+      if (!data.q || !data.a) {
+        alert('Vul minstens een vraag en antwoord in.');
+        return;
+      }
+      if (editingId) {
+        const card = CARDS.find(c => c.id === editingId);
+        if (card) Object.assign(card, data);
+      } else {
+        const card = { id: newId(), ...data };
+        CARDS.push(card);
+        editingId = card.id;
+      }
+      saveCards();
+      applyFilter();
+      renderEditorList();
+      openEditorForCard(editingId);
+    }
+
+    document.getElementById('btn-save-card').addEventListener('click', saveEditorCard);
+
+    document.getElementById('btn-new-card').addEventListener('click', () => {
+      editingId = null;
+      document.getElementById('editor-form-empty').style.display = 'none';
+      document.getElementById('editor-form-fields').style.display = 'block';
+      document.getElementById('editor-form-title').textContent = 'Nieuwe kaart';
+      document.getElementById('edit-section').value = editorFilterSection !== 'all' ? editorFilterSection : '';
+      document.getElementById('edit-question').value = '';
+      document.getElementById('edit-answer').value = '';
+      document.getElementById('edit-question').focus();
+      renderEditorList();
+    });
+
+    document.getElementById('btn-duplicate-card').addEventListener('click', () => {
+      const data = readEditorForm();
+      if (!data.q) return;
+      const card = { id: newId(), section: data.section, q: data.q + ' (kopie)', a: data.a };
+      CARDS.push(card);
+      saveCards();
+      applyFilter();
+      openEditorForCard(card.id);
+    });
+
+    document.getElementById('btn-delete-card').addEventListener('click', () => {
+      if (!editingId) return;
+      if (!confirm('Deze kaart definitief verwijderen?')) return;
+      CARDS = CARDS.filter(c => c.id !== editingId);
+      delete fcProgress[editingId];
+      saveFcProgress();
+      editingId = null;
+      saveCards();
+      applyFilter();
+      document.getElementById('editor-form-empty').style.display = 'block';
+      document.getElementById('editor-form-fields').style.display = 'none';
+      document.getElementById('editor-form-title').textContent = 'Selecteer een kaart';
+      renderEditorList();
+    });
+
+    document.getElementById('editor-search').addEventListener('input', e => {
+      editorSearch = e.target.value;
+      renderEditorList();
+    });
+
+    document.getElementById('btn-export-cards').addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(CARDS, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'life_events_flashcards_backup.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+    document.getElementById('import-file').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          if (!Array.isArray(data) || !data.length) throw new Error('Leeg');
+          CARDS = data.map(c => ({
+            id: c.id || newId(),
+            section: c.section || 'Eigen kaarten',
+            q: c.q || '',
+            a: c.a || '',
+          })).filter(c => c.q && c.a);
+          saveCards();
+          applyFilter();
+          renderEditorList();
+          alert('Backup geïmporteerd: ' + CARDS.length + ' kaarten.');
+        } catch (err) {
+          alert('Kon backup niet lezen. Controleer het JSON-bestand.');
+        }
+        e.target.value = '';
+      };
+      reader.readAsText(file);
+    });
+
+    document.getElementById('btn-reset-cards').addEventListener('click', () => {
+      if (!confirm('Alle kaarten terugzetten naar de originele set? Je eigen wijzigingen gaan verloren.')) return;
+      CARDS = JSON.parse(JSON.stringify(DEFAULT_CARDS));
+      localStorage.removeItem(STORAGE_CARDS);
+      editingId = null;
+      saveCards(false);
+      applyFilter();
+      document.getElementById('editor-form-empty').style.display = 'block';
+      document.getElementById('editor-form-fields').style.display = 'none';
+      renderEditorList();
+      showSaved();
+    });
+
+    document.addEventListener('keydown', e => {
+      if (!document.getElementById('panel-flashcards').classList.contains('active')) return;
+      const tag = (e.target && e.target.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      if (e.code === 'Escape' && fcFullscreen) {
+        e.preventDefault();
+        toggleFcFullscreen();
+        return;
+      }
+      if (e.code === 'Space') { e.preventDefault(); flipCard(); }
+      if (e.code === 'ArrowRight') { e.preventDefault(); nextCard(); }
+      if (e.code === 'ArrowLeft') { e.preventDefault(); prevCard(); }
+      if (e.code === 'Enter') { e.preventDefault(); rateGood(); }
+      if (e.code === 'Backspace') { e.preventDefault(); rateBad(); }
+    });
+
+    // Checklist
+    const clState = JSON.parse(localStorage.getItem(STORAGE_CL) || '{}');
+    document.querySelectorAll('#checklist input').forEach(inp => {
+      if (clState[inp.dataset.id]) inp.checked = true;
+      inp.addEventListener('change', () => {
+        clState[inp.dataset.id] = inp.checked;
+        localStorage.setItem(STORAGE_CL, JSON.stringify(clState));
+      });
+    });
+
+    // Oefenexamen
+    let examSectionFilter = 'all';
+    let examSession = null;
+    let examHistoryViewId = null;
+
+    function loadExamHistory() {
+      try {
+        const raw = localStorage.getItem(STORAGE_EXAM_HISTORY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (e) { return []; }
+    }
+
+    function saveExamHistory(list) {
+      localStorage.setItem(STORAGE_EXAM_HISTORY, JSON.stringify(list.slice(0, EXAM_HISTORY_MAX)));
+    }
+
+    function formatExamDate(iso) {
+      const d = new Date(iso);
+      return d.toLocaleDateString('nl-BE', {
+        day: 'numeric', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+    }
+
+    function formatDuration(ms) {
+      if (!ms || ms < 1000) return '< 1 min';
+      const m = Math.floor(ms / 60000);
+      const s = Math.floor((ms % 60000) / 1000);
+      return m ? m + ' min ' + s + ' s' : s + ' s';
+    }
+
+    function getMcBank(section) {
+      if (section === 'all') return [...MC_QUESTIONS];
+      return MC_QUESTIONS.filter(q => q.section === section);
+    }
+
+    function shuffleArray(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function showExamView(view) {
+      document.getElementById('exam-view-start').style.display = view === 'start' ? 'block' : 'none';
+      document.getElementById('exam-view-active').style.display = view === 'active' ? 'block' : 'none';
+      document.getElementById('exam-view-results').style.display = view === 'results' ? 'block' : 'none';
+      document.getElementById('exam-view-history').style.display = view === 'history' ? 'block' : 'none';
+    }
+
+    function renderExamHistory() {
+      const history = loadExamHistory();
+      const empty = document.getElementById('exam-recent-empty');
+      const recent = document.getElementById('exam-recent-list');
+      const sidebar = document.getElementById('exam-history-sidebar');
+
+      if (!history.length) {
+        if (empty) empty.style.display = 'block';
+        if (recent) recent.innerHTML = '';
+        if (sidebar) sidebar.innerHTML = '<p class="exam-empty" style="padding:0.5rem 0">Geen historiek</p>';
+        return;
+      }
+      if (empty) empty.style.display = 'none';
+
+      const itemHtml = (h, compact) => `
+        <button type="button" class="exam-history-item ${examHistoryViewId === h.id ? 'active' : ''}" data-id="${h.id}">
+          <span>
+            <span class="score">${h.score}/${h.total} (${h.pct}%)</span>
+            <span class="meta">${formatExamDate(h.date)} · ${h.sectionLabel} · ${formatDuration(h.durationMs)}</span>
+          </span>
+        </button>`;
+
+      if (recent) {
+        recent.innerHTML = history.slice(0, 5).map(h => itemHtml(h, true)).join('');
+        recent.querySelectorAll('.exam-history-item').forEach(btn => {
+          btn.addEventListener('click', () => openExamHistoryDetail(btn.dataset.id));
+        });
+      }
+      if (sidebar) {
+        sidebar.innerHTML = history.map(h => itemHtml(h, false)).join('');
+        sidebar.querySelectorAll('.exam-history-item').forEach(btn => {
+          btn.addEventListener('click', () => openExamHistoryDetail(btn.dataset.id));
+        });
+      }
+    }
+
+    function openExamHistoryDetail(id) {
+      const h = loadExamHistory().find(x => x.id === id);
+      if (!h) return;
+      examHistoryViewId = id;
+      showExamView('history');
+      document.getElementById('exam-history-detail-summary').innerHTML = `
+        <div class="exam-score-big">${h.score} / ${h.total}</div>
+        <div class="exam-score-sub">${h.pct}% correct · ${formatExamDate(h.date)} · ${h.sectionLabel} · ${formatDuration(h.durationMs)}</div>
+      `;
+      document.getElementById('exam-history-detail-review').innerHTML = h.answers.map((a, i) => {
+        const cls = a.chosen === a.correct ? 'right' : 'wrong';
+        const chosenText = a.chosen != null ? escapeHtml(a.options[a.chosen]) : '<em>Geen antwoord</em>';
+        const correctText = escapeHtml(a.options[a.correct]);
+        return `<div class="exam-review-item ${cls}">
+          <strong>Vraag ${i + 1}:</strong> ${escapeHtml(a.q)}<br>
+          <span style="color:var(--muted)">${escapeHtml(a.section)}</span><br>
+          Jouw antwoord: ${chosenText}<br>
+          ${a.chosen !== a.correct ? 'Correct: ' + correctText : '✓ Correct'}
+        </div>`;
+      }).join('');
+      renderExamHistory();
+    }
+
+    function shuffleQuestionOptions(q) {
+      const indexed = q.options.map((opt, i) => ({ opt, i }));
+      const shuffled = shuffleArray(indexed);
+      return {
+        ...q,
+        options: shuffled.map(x => x.opt),
+        correct: shuffled.findIndex(x => x.i === q.correct),
+      };
+    }
+
+    function startExam() {
+      const countSel = document.getElementById('exam-count').value;
+      const section = document.getElementById('exam-section-select').value;
+      let bank = getMcBank(section);
+      if (!bank.length) {
+        alert('Geen vragen beschikbaar voor dit onderwerp.');
+        return;
+      }
+      bank = shuffleArray(bank);
+      const n = countSel === 'all' ? bank.length : Math.min(parseInt(countSel, 10), bank.length);
+      const questions = bank.slice(0, n).map(q => shuffleQuestionOptions(q));
+      examSession = {
+        startedAt: Date.now(),
+        section,
+        sectionLabel: section === 'all' ? 'Alle vragen' : section,
+        questions,
+        answers: new Array(questions.length).fill(null),
+        index: 0,
+      };
+      showExamView('active');
+      renderExamQuestion();
+    }
+
+    function renderExamQuestion() {
+      if (!examSession) return;
+      const { questions, answers, index } = examSession;
+      const q = questions[index];
+      const card = document.getElementById('exam-question-card');
+      document.getElementById('exam-progress-text').textContent =
+        'Vraag ' + (index + 1) + ' / ' + questions.length +
+        ' · ' + answers.filter(a => a !== null).length + ' beantwoord';
+
+      const letters = ['A', 'B', 'C', 'D'];
+      card.innerHTML = `
+        <div class="exam-q-num">${escapeHtml(q.section)}</div>
+        <div class="exam-q-text">${escapeHtml(q.q)}</div>
+        <div class="exam-options">
+          ${q.options.map((opt, i) => `
+            <label class="exam-option ${answers[index] === i ? 'selected' : ''}">
+              <input type="radio" name="exam-opt" value="${i}" ${answers[index] === i ? 'checked' : ''}>
+              <span><strong>${letters[i]}.</strong> ${escapeHtml(opt)}</span>
+            </label>
+          `).join('')}
+        </div>
+      `;
+      card.querySelectorAll('.exam-option').forEach(label => {
+        const input = label.querySelector('input');
+        label.addEventListener('click', () => {
+          examSession.answers[index] = parseInt(input.value, 10);
+          card.querySelectorAll('.exam-option').forEach(l => l.classList.remove('selected'));
+          label.classList.add('selected');
+          input.checked = true;
+          document.getElementById('exam-progress-text').textContent =
+            'Vraag ' + (index + 1) + ' / ' + questions.length +
+            ' · ' + examSession.answers.filter(a => a !== null).length + ' beantwoord';
+        });
+      });
+      document.getElementById('btn-exam-prev').disabled = index === 0;
+      document.getElementById('btn-exam-next').disabled = index === questions.length - 1;
+    }
+
+    function submitExam() {
+      if (!examSession) return;
+      const unanswered = examSession.answers.filter(a => a === null).length;
+      if (unanswered > 0) {
+        if (!confirm('Je hebt nog ' + unanswered + ' onbeantwoorde vraag/vragen. Toch indienen?')) return;
+      }
+      const { questions, answers, startedAt, section, sectionLabel } = examSession;
+      let score = 0;
+      const answerRecords = questions.map((q, i) => {
+        const chosen = answers[i];
+        const correct = q.correct;
+        if (chosen === correct) score++;
+        return {
+          id: q.id,
+          section: q.section,
+          q: q.q,
+          options: q.options,
+          correct,
+          chosen,
+        };
+      });
+      const total = questions.length;
+      const pct = total ? Math.round(score / total * 100) : 0;
+      const entry = {
+        id: 'exam_' + Date.now(),
+        date: new Date().toISOString(),
+        score,
+        total,
+        pct,
+        section,
+        sectionLabel,
+        durationMs: Date.now() - startedAt,
+        answers: answerRecords,
+      };
+      const history = loadExamHistory();
+      history.unshift(entry);
+      saveExamHistory(history);
+      examSession = null;
+      showExamResults(entry);
+      renderExamHistory();
+    }
+
+    function showExamResults(entry) {
+      showExamView('results');
+      const emoji = entry.pct >= 80 ? '🎉' : entry.pct >= 60 ? '👍' : '📚';
+      document.getElementById('exam-results-summary').innerHTML = `
+        <div class="exam-score-big">${entry.score} / ${entry.total} ${emoji}</div>
+        <div class="exam-score-sub">${entry.pct}% correct · ${entry.sectionLabel} · ${formatDuration(entry.durationMs)}</div>
+        <p style="margin:1rem 0 0;color:var(--muted);font-size:0.9rem">Opgeslagen in je lokale historiek op dit apparaat.</p>
+      `;
+      document.getElementById('exam-review-list').innerHTML = entry.answers.map((a, i) => {
+        const cls = a.chosen === a.correct ? 'right' : 'wrong';
+        const chosenText = a.chosen != null ? escapeHtml(a.options[a.chosen]) : '<em>Geen antwoord</em>';
+        const correctText = escapeHtml(a.options[a.correct]);
+        return `<div class="exam-review-item ${cls}">
+          <strong>Vraag ${i + 1}:</strong> ${escapeHtml(a.q)}<br>
+          Jouw antwoord: ${chosenText}<br>
+          ${a.chosen !== a.correct ? '<span style="color:#b91c1c">Correct: ' + correctText + '</span>' : '<span style="color:var(--success)">Correct</span>'}
+        </div>`;
+      }).join('');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.getElementById('btn-start-exam').addEventListener('click', startExam);
+    document.getElementById('btn-exam-prev').addEventListener('click', () => {
+      if (examSession && examSession.index > 0) { examSession.index--; renderExamQuestion(); }
+    });
+    document.getElementById('btn-exam-next').addEventListener('click', () => {
+      if (examSession && examSession.index < examSession.questions.length - 1) {
+        examSession.index++;
+        renderExamQuestion();
+      }
+    });
+    document.getElementById('btn-exam-submit').addEventListener('click', submitExam);
+    document.getElementById('btn-exam-cancel').addEventListener('click', () => {
+      if (examSession && !confirm('Oefenexamen annuleren? Voortgang gaat verloren.')) return;
+      examSession = null;
+      showExamView('start');
+    });
+    document.getElementById('btn-exam-retry').addEventListener('click', () => {
+      showExamView('start');
+      document.getElementById('exam-section-select').value = examSectionFilter === 'all' ? 'all' : examSectionFilter;
+    });
+    document.getElementById('btn-exam-back-start').addEventListener('click', () => showExamView('start'));
+    document.getElementById('btn-exam-back-from-history').addEventListener('click', () => {
+      examHistoryViewId = null;
+      showExamView('start');
+      renderExamHistory();
+    });
+
+    document.getElementById('btn-clear-exam-history').addEventListener('click', () => {
+      if (!confirm('Alle oefenexamen-resultaten op dit apparaat wissen?')) return;
+      localStorage.removeItem(STORAGE_EXAM_HISTORY);
+      examHistoryViewId = null;
+      renderExamHistory();
+      showExamView('start');
+    });
+
+    document.querySelectorAll('#exam-nav .filter-btn[data-exam-section]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#exam-nav .filter-btn[data-exam-section]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        examSectionFilter = btn.dataset.examSection;
+        document.getElementById('exam-section-select').value = examSectionFilter;
+        const n = getMcBank(examSectionFilter).length;
+        document.getElementById('exam-bank-count').textContent = n;
+      });
+    });
+
+    document.getElementById('exam-section-select').addEventListener('change', e => {
+      examSectionFilter = e.target.value;
+      document.querySelectorAll('#exam-nav .filter-btn[data-exam-section]').forEach(b => {
+        b.classList.toggle('active', b.dataset.examSection === examSectionFilter);
+      });
+      document.getElementById('exam-bank-count').textContent = getMcBank(examSectionFilter).length;
+    });
+
+    // Mindmaps (Mermaid)
+    let currentMmId = MM_DEFAULT_ID;
+    let mermaidApi = null;
+    const mmRendered = new Set();
+
+    async function initMermaid() {
+      if (mermaidApi) return mermaidApi;
+      const mod = await import('https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs');
+      mermaidApi = mod.default;
+      mermaidApi.initialize({
+        startOnLoad: false,
+        theme: 'neutral',
+        securityLevel: 'loose',
+        mindmap: { padding: 16, useMaxWidth: true },
+      });
+      return mermaidApi;
+    }
+
+    async function showMindmap(id) {
+      currentMmId = id;
+      document.querySelectorAll('.mm-panel').forEach(p => {
+        p.style.display = p.dataset.mmId === id ? 'block' : 'none';
+      });
+      document.querySelectorAll('.mm-nav-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.mmId === id);
+      });
+      const panel = document.getElementById('mm-' + id);
+      if (!panel || mmRendered.has(id)) return;
+      const source = panel.querySelector('.mm-source');
+      if (!source) return;
+      const wrap = panel.querySelector('.mm-diagram-wrap');
+      wrap.innerHTML = '<div class="mm-loading">Mindmap laden…</div>';
+      try {
+        const mermaid = await initMermaid();
+        const code = source.textContent.trim();
+        const uid = 'mm-render-' + id;
+        const { svg } = await mermaid.render(uid, code);
+        wrap.innerHTML = svg;
+        mmRendered.add(id);
+      } catch (err) {
+        console.error(err);
+        wrap.innerHTML = '<div class="mm-loading">Kon mindmap niet renderen. Vernieuw de pagina.</div>';
+      }
+    }
+
+    document.querySelectorAll('.mm-nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => showMindmap(btn.dataset.mmId));
+    });
+
+    rebuildFcNav();
+    applyFilter();
+    updateStats();
+    renderWeakList();
+  </script>
+</body>
+</html>
