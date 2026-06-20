@@ -242,10 +242,25 @@
       padding: 1.5rem 2rem 2rem;
       overflow: auto;
     }
+    .fc-fullscreen-progress {
+      display: none;
+      flex: 1;
+      min-width: 0;
+    }
+    .fc-fullscreen-progress .fc-progress-bar {
+      margin-top: 0.35rem;
+      margin-bottom: 0.5rem;
+    }
     .fc-stage.fullscreen .fc-stage-toolbar {
       max-width: 960px;
       width: 100%;
       margin: 0 auto 0.75rem;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    .fc-stage.fullscreen .fc-fullscreen-progress {
+      display: block;
     }
     .fc-stage.fullscreen .flashcard-wrap {
       max-width: 960px;
@@ -1580,6 +1595,11 @@
         <div class="fc-session-stats" id="fc-session-stats"></div>
         <div class="fc-stage" id="fc-stage">
           <div class="fc-stage-toolbar">
+            <div class="fc-fullscreen-progress" id="fc-fullscreen-progress" aria-hidden="true">
+              <span id="fc-stats-fullscreen">0 / 0 beheerst</span>
+              <div class="fc-progress-bar"><div class="fc-progress-fill" id="fc-progress-fill-fullscreen"></div></div>
+              <div class="fc-session-stats" id="fc-session-stats-fullscreen"></div>
+            </div>
             <button type="button" id="btn-fc-fullscreen" title="Groot scherm (Esc om te sluiten)">⛶ Groot scherm</button>
           </div>
           <div class="flashcard-wrap" id="fc-wrap">
@@ -2136,7 +2156,7 @@
     const STORAGE_EXAM_HISTORY = 'life_events_exam_history';
     const EXAM_HISTORY_MAX = 50;
     const FC_REQUEUE_GOOD = 5;
-    const FC_REQUEUE_BAD = 2;
+    const FC_REQUEUE_BAD = 5;
     const FC_WEAK_THRESHOLD = 2;
 
     let CARDS = loadCards();
@@ -2152,18 +2172,26 @@
     let editorSearch = '';
 
     function loadFcProgress() {
+      let raw = {};
       try {
-        const raw = localStorage.getItem(STORAGE_FC_PROGRESS);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed && typeof parsed === 'object') return parsed;
+        const stored = localStorage.getItem(STORAGE_FC_PROGRESS);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && typeof parsed === 'object') raw = parsed;
         }
       } catch (e) {}
-      const legacy = JSON.parse(localStorage.getItem(STORAGE_FC) || '[]');
-      const migrated = {};
-      legacy.forEach(id => {
-        migrated[id] = { state: 'mastered', fails: 0 };
-      });
+      if (!Object.keys(raw).length) {
+        try {
+          const legacy = JSON.parse(localStorage.getItem(STORAGE_FC) || '[]');
+          legacy.forEach(id => {
+            raw[id] = { state: 'mastered', fails: 0 };
+          });
+        } catch (e) {}
+      }
+      const migrated = migrateFcProgress(raw);
+      if (JSON.stringify(migrated) !== JSON.stringify(raw)) {
+        localStorage.setItem(STORAGE_FC_PROGRESS, JSON.stringify(migrated));
+      }
       return migrated;
     }
 
@@ -2186,14 +2214,15 @@
     }
 
     function loadCards() {
+      const defaults = JSON.parse(JSON.stringify(DEFAULT_CARDS));
       try {
         const saved = localStorage.getItem(STORAGE_CARDS);
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length) return parsed;
+          if (Array.isArray(parsed) && parsed.length) return mergeCardSets(parsed, defaults);
         }
       } catch (e) {}
-      return JSON.parse(JSON.stringify(DEFAULT_CARDS));
+      return defaults;
     }
 
     function saveCards(showToast = true) {
@@ -2210,7 +2239,57 @@
       setTimeout(() => t.classList.remove('show'), 1600);
     }
 
-    function cardKey(c) { return c.id; }
+    function cardKey(c) {
+      return c.section + '\x1f' + c.q;
+    }
+
+    function progressRank(p) {
+      const ranks = { new: 0, confirm: 1, mastered: 2 };
+      return ranks[p && p.state] || 0;
+    }
+
+    function mergeProgressEntry(a, b) {
+      if (!a) return b;
+      if (!b) return a;
+      const primary = progressRank(a) >= progressRank(b) ? a : b;
+      return {
+        state: primary.state,
+        fails: Math.max(a.fails || 0, b.fails || 0),
+      };
+    }
+
+    function migrateFcProgress(raw) {
+      const idToContent = {};
+      [...CARDS, ...DEFAULT_CARDS].forEach(c => {
+        idToContent[c.id] = cardKey(c);
+      });
+      const migrated = {};
+      Object.entries(raw || {}).forEach(([key, val]) => {
+        const contentKey = idToContent[key] || key;
+        migrated[contentKey] = mergeProgressEntry(migrated[contentKey], val);
+      });
+      return migrated;
+    }
+
+    function mergeCardSets(saved, defaults) {
+      const savedByContent = new Map(saved.map(c => [cardKey(c), c]));
+      const merged = [];
+      const seen = new Set();
+      defaults.forEach(def => {
+        const key = cardKey(def);
+        const custom = savedByContent.get(key);
+        merged.push(custom ? { ...custom, id: def.id } : { ...def });
+        seen.add(key);
+      });
+      saved.forEach(c => {
+        const key = cardKey(c);
+        if (!seen.has(key)) {
+          merged.push({ ...c });
+          seen.add(key);
+        }
+      });
+      return merged;
+    }
 
     function newId() {
       return 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -2412,16 +2491,24 @@
       const mastered = pool.filter(c => isMastered(cardKey(c))).length;
       const confirm = pool.filter(c => getCardProgress(cardKey(c)).state === 'confirm').length;
       const remaining = pool.filter(c => !isMastered(cardKey(c))).length;
-      document.getElementById('fc-stats').textContent =
-        mastered + ' / ' + pool.length + ' beheerst in deze selectie';
-      document.getElementById('fc-progress-fill').style.width = (mastered / total * 100) + '%';
-      document.getElementById('fc-progress-fill').classList.toggle('confirm', confirm > 0 && mastered < pool.length);
-      const statsEl = document.getElementById('fc-session-stats');
-      statsEl.innerHTML =
+      const summary = mastered + ' / ' + pool.length + ' beheerst in deze selectie';
+      const sessionHtml =
         '<span><strong>' + remaining + '</strong> nog te leren</span>' +
         '<span><strong>' + confirm + '</strong> wacht op bevestiging</span>' +
         '<span><strong>' + queue.length + '</strong> in wachtrij</span>' +
         (queue.length ? '<span>Kaart <strong>' + (index + 1) + '</strong> / ' + queue.length + '</span>' : '');
+      const showConfirm = confirm > 0 && mastered < pool.length;
+      const pct = (mastered / total * 100) + '%';
+
+      document.getElementById('fc-stats').textContent = summary;
+      document.getElementById('fc-progress-fill').style.width = pct;
+      document.getElementById('fc-progress-fill').classList.toggle('confirm', showConfirm);
+      document.getElementById('fc-session-stats').innerHTML = sessionHtml;
+
+      document.getElementById('fc-stats-fullscreen').textContent = summary;
+      document.getElementById('fc-progress-fill-fullscreen').style.width = pct;
+      document.getElementById('fc-progress-fill-fullscreen').classList.toggle('confirm', showConfirm);
+      document.getElementById('fc-session-stats-fullscreen').innerHTML = sessionHtml;
     }
 
     function nextCard() {
@@ -2495,8 +2582,10 @@
       fcFullscreen = !fcFullscreen;
       const stage = document.getElementById('fc-stage');
       stage.classList.toggle('fullscreen', fcFullscreen);
+      document.getElementById('fc-fullscreen-progress').setAttribute('aria-hidden', fcFullscreen ? 'false' : 'true');
       document.body.style.overflow = fcFullscreen ? 'hidden' : '';
       document.getElementById('btn-fc-fullscreen').textContent = fcFullscreen ? '✕ Sluit groot scherm' : '⛶ Groot scherm';
+      if (fcFullscreen) updateStats();
     }
 
     document.getElementById('flashcard').addEventListener('click', flipCard);
@@ -2678,8 +2767,9 @@
     document.getElementById('btn-delete-card').addEventListener('click', () => {
       if (!editingId) return;
       if (!confirm('Deze kaart definitief verwijderen?')) return;
+      const removed = CARDS.find(c => c.id === editingId);
       CARDS = CARDS.filter(c => c.id !== editingId);
-      delete fcProgress[editingId];
+      if (removed) delete fcProgress[cardKey(removed)];
       saveFcProgress();
       editingId = null;
       saveCards();
