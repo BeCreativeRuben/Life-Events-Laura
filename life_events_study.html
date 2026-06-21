@@ -3,6 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('life_events_theme');
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+      } catch (e) {}
+    })();
+  </script>
   <title>Life Events — Studiegids & Flashcards</title>
   <style>
     :root {
@@ -15,9 +24,63 @@
       --border: #e2e8f0;
       --success: #059669;
       --warning: #d97706;
+      --danger: #b91c1c;
+      --danger-soft: #fef2f2;
+      --danger-border: #fca5a5;
+      --success-soft: #ecfdf5;
+      --error: #ef4444;
+      --confirm: #0d9488;
+      --strong: #0f172a;
+      --header-bg: rgba(255, 255, 255, 0.92);
       --shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+      --tab-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+      --on-accent: #ffffff;
+      --toast-bg: #0f172a;
+      --toast-fg: #ffffff;
+      --weak-bg: #fff7ed;
+      --weak-border: #fed7aa;
+      --weak-title: #9a3412;
+      --weak-text: #7c2d12;
+      --weak-item-bg: #ffffff;
+      --weak-item-border: #fdba74;
+      --weak-item-hover: #ea580c;
+      --weak-badge-bg: #ffedd5;
+      --weak-badge-fg: #c2410c;
       --radius: 12px;
       --sidebar-w: 260px;
+    }
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --text: #e8edf4;
+      --muted: #94a3b8;
+      --accent: #3b82f6;
+      --accent-soft: #1e3a5f;
+      --border: #2d3a4d;
+      --success: #34d399;
+      --warning: #fbbf24;
+      --danger: #f87171;
+      --danger-soft: #3f1d1d;
+      --danger-border: #7f1d1d;
+      --success-soft: #064e3b;
+      --error: #f87171;
+      --confirm: #2dd4bf;
+      --strong: #f1f5f9;
+      --header-bg: rgba(26, 35, 50, 0.92);
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+      --tab-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+      --toast-bg: #334155;
+      --toast-fg: #f8fafc;
+      --weak-bg: #2a1f14;
+      --weak-border: #7c4a1a;
+      --weak-title: #fdba74;
+      --weak-text: #fcd9b8;
+      --weak-item-bg: #1a2332;
+      --weak-item-border: #9a3412;
+      --weak-item-hover: #ea580c;
+      --weak-badge-bg: #431407;
+      --weak-badge-fg: #fdba74;
     }
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
@@ -32,7 +95,7 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(255,255,255,0.92);
+      background: var(--header-bg);
       backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--border);
       padding: 0.75rem 1.25rem;
@@ -41,6 +104,23 @@
       justify-content: space-between;
       gap: 1rem;
       flex-wrap: wrap;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .theme-toggle {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 999px;
+      width: 2.35rem;
+      height: 2.35rem;
+      cursor: pointer;
+      font-size: 1.05rem;
+      line-height: 1;
+      flex-shrink: 0;
     }
     .app-header h1 {
       margin: 0;
@@ -68,7 +148,7 @@
     .tab.active {
       background: var(--surface);
       color: var(--accent);
-      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      box-shadow: var(--tab-shadow);
     }
     .layout {
       display: grid;
@@ -146,7 +226,7 @@
     }
     .guide-content th { background: var(--accent-soft); }
     .guide-content ul { padding-left: 1.25rem; }
-    .guide-content strong { color: #0f172a; }
+    .guide-content strong { color: var(--strong); }
     .guide-content img {
       display: block;
       max-width: 100%;
@@ -182,7 +262,7 @@
     }
     .fc-toolbar button.primary {
       background: var(--accent);
-      color: white;
+      color: var(--on-accent);
       border-color: var(--accent);
       font-weight: 600;
     }
@@ -340,7 +420,7 @@
     }
     .fc-fullscreen-editor-actions button.primary {
       background: var(--accent);
-      color: white;
+      color: var(--on-accent);
       border-color: var(--accent);
       font-weight: 600;
     }
@@ -418,7 +498,7 @@
       margin-top: 0.75rem;
       min-height: 1.25rem;
     }
-    .fc-status-badge.confirm { color: #0d9488; }
+    .fc-status-badge.confirm { color: var(--confirm); }
     .fc-actions {
       display: flex;
       justify-content: center;
@@ -438,19 +518,19 @@
     .fc-weak-panel {
       margin-top: 2.5rem;
       padding: 1.25rem 1.5rem;
-      background: #fff7ed;
-      border: 1px solid #fed7aa;
+      background: var(--weak-bg);
+      border: 1px solid var(--weak-border);
       border-radius: var(--radius);
     }
     .fc-weak-panel h3 {
       margin: 0 0 0.35rem;
       font-size: 1.1rem;
-      color: #9a3412;
+      color: var(--weak-title);
     }
     .fc-weak-panel > p {
       margin: 0 0 1rem;
       font-size: 0.9rem;
-      color: #7c2d12;
+      color: var(--weak-text);
     }
     .fc-weak-list {
       display: grid;
@@ -460,8 +540,8 @@
       overflow-y: auto;
     }
     .fc-weak-item {
-      background: white;
-      border: 1px solid #fdba74;
+      background: var(--weak-item-bg);
+      border: 1px solid var(--weak-item-border);
       border-radius: 8px;
       padding: 0.75rem 1rem;
       font-size: 0.9rem;
@@ -471,11 +551,11 @@
       align-items: flex-start;
       gap: 0.75rem;
     }
-    .fc-weak-item:hover { border-color: #ea580c; }
+    .fc-weak-item:hover { border-color: var(--weak-item-hover); }
     .fc-weak-item .fail-count {
       flex-shrink: 0;
-      background: #ffedd5;
-      color: #c2410c;
+      background: var(--weak-badge-bg);
+      color: var(--weak-badge-fg);
       font-weight: 700;
       font-size: 0.75rem;
       padding: 0.2rem 0.5rem;
@@ -549,12 +629,12 @@
     }
     .editor-toolbar button.primary {
       background: var(--accent);
-      color: white;
+      color: var(--on-accent);
       border-color: var(--accent);
     }
     .editor-toolbar button.danger {
-      border-color: #fca5a5;
-      color: #b91c1c;
+      border-color: var(--danger-border);
+      color: var(--danger);
     }
     .editor-toolbar label.btn-file input { display: none; }
     .editor-layout {
@@ -570,6 +650,8 @@
       border-radius: 8px;
       margin-bottom: 0.75rem;
       font-size: 0.95rem;
+      background: var(--surface);
+      color: var(--text);
     }
     .editor-list {
       max-height: 70vh;
@@ -625,6 +707,8 @@
       border-radius: 8px;
       font: inherit;
       font-size: 0.95rem;
+      background: var(--surface);
+      color: var(--text);
     }
     .editor-form textarea { min-height: 100px; resize: vertical; }
     .editor-form-actions {
@@ -643,12 +727,12 @@
     }
     .editor-form-actions button.primary {
       background: var(--accent);
-      color: white;
+      color: var(--on-accent);
       border-color: var(--accent);
     }
     .editor-form-actions button.danger {
-      color: #b91c1c;
-      border-color: #fca5a5;
+      color: var(--danger);
+      border-color: var(--danger-border);
     }
     .editor-empty {
       color: var(--muted);
@@ -660,8 +744,8 @@
       position: fixed;
       bottom: 1.25rem;
       right: 1.25rem;
-      background: #0f172a;
-      color: white;
+      background: var(--toast-bg);
+      color: var(--toast-fg);
       padding: 0.65rem 1rem;
       border-radius: 8px;
       font-size: 0.9rem;
@@ -714,7 +798,7 @@
       border-radius: 8px;
       border: none;
       background: var(--accent);
-      color: white;
+      color: var(--on-accent);
       font-weight: 600;
       cursor: pointer;
     }
@@ -763,9 +847,9 @@
     .exam-option:hover { background: var(--bg); }
     .exam-option input { margin-top: 0.2rem; accent-color: var(--accent); }
     .exam-option.selected { border-color: var(--accent); background: var(--accent-soft); }
-    .exam-option.correct { border-color: var(--success); background: #ecfdf5; }
-    .exam-option.wrong { border-color: #ef4444; background: #fef2f2; }
-    .exam-option.missed { border-color: var(--success); background: #ecfdf5; opacity: 0.85; }
+    .exam-option.correct { border-color: var(--success); background: var(--success-soft); }
+    .exam-option.wrong { border-color: var(--error); background: var(--danger-soft); }
+    .exam-option.missed { border-color: var(--success); background: var(--success-soft); opacity: 0.85; }
     .exam-nav-btns {
       display: flex;
       flex-wrap: wrap;
@@ -782,12 +866,12 @@
     }
     .exam-nav-btns button.primary {
       background: var(--accent);
-      color: white;
+      color: var(--on-accent);
       border-color: var(--accent);
     }
     .exam-nav-btns button.success {
       background: var(--success);
-      color: white;
+      color: var(--on-accent);
       border-color: var(--success);
     }
     .exam-results {
@@ -929,13 +1013,16 @@
 <body>
   <header class="app-header">
     <h1>Life Events — Examen</h1>
-    <div class="tabs" role="tablist">
-      <button class="tab active" data-panel="guide" role="tab">Studiegids</button>
-      <button class="tab" data-panel="flashcards" role="tab">Flashcards (<span id="tab-fc-count">318</span>)</button>
-      <button class="tab" data-panel="editor" role="tab">Bewerken</button>
-      <button class="tab" data-panel="exam" role="tab">Oefenexamen</button>
-      <button class="tab" data-panel="mindmaps" role="tab">Mindmaps</button>
-      <button class="tab" data-panel="checklist" role="tab">Checklist</button>
+    <div class="header-actions">
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-panel="guide" role="tab">Studiegids</button>
+        <button class="tab" data-panel="flashcards" role="tab">Flashcards (<span id="tab-fc-count">318</span>)</button>
+        <button class="tab" data-panel="editor" role="tab">Bewerken</button>
+        <button class="tab" data-panel="exam" role="tab">Oefenexamen</button>
+        <button class="tab" data-panel="mindmaps" role="tab">Mindmaps</button>
+        <button class="tab" data-panel="checklist" role="tab">Checklist</button>
+      </div>
+      <button type="button" class="theme-toggle" id="btn-theme-toggle" title="Donker thema" aria-label="Donker thema">🌙</button>
     </div>
   </header>
 
@@ -956,7 +1043,7 @@
         <p class="exam-sidebar-hint">Kies een onderwerp en start een oefenexamen. Resultaten worden lokaal opgeslagen op dit apparaat.</p>
         <h2 style="margin-top:1.25rem">Historiek</h2>
         <div class="exam-history-list" id="exam-history-sidebar"></div>
-        <button type="button" class="filter-btn" id="btn-clear-exam-history" style="margin-top:0.5rem;color:#b91c1c">Wis historiek</button>
+        <button type="button" class="filter-btn" id="btn-clear-exam-history" style="margin-top:0.5rem;color:var(--danger)">Wis historiek</button>
       </div>
       <div id="mindmap-nav" style="display:none">
         <div class="mm-group-label">Hoorcollege 1</div><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc1">Inleiding</button><div class="mm-group-label">Hoorcollege 2</div><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc2">Ouderschap</button><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc2-kinderverlies">Artikel: verlies van een kind</button><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc2-gezinsstress">Artikel: gezinsstress Amsterdam</button><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc2-familiereflex">Familiereflex</button><div class="mm-group-label">Hoorcollege 3</div><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc3">Relaties</button><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc3-gender">Artikel: gender en TGD</button><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc3-inclusief">Artikel: inclusieve zorg</button><div class="mm-group-label">Hoorcollege 4</div><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc4">School en Werk</button><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc4-eclsk">Artikel: ECLS-K kindergarten</button><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc4-transitions">Artikel: Transitions-programma</button><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc4-pabian">Artikel: Pabian pesten</button><div class="mm-group-label">Hoorcollege 5</div><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc5">Verlies</button><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc5-ethiopie">Artikel: vluchtelingen Ethiopië</button><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc5-bonanno">Artikel: Bonanno partnerverlies</button><div class="mm-group-label">Hoorcollege 6</div><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc6">Omgaan met life events</button><button type="button" class="filter-btn mm-nav-btn" data-mm-id="hc6-rouw">Rouwmodellen</button><div class="mm-group-label">Overig</div><button type="button" class="filter-btn mm-nav-btn" data-mm-id="tools">Digitale tools</button>
@@ -2239,10 +2326,16 @@
     const STORAGE_FC_PROGRESS = 'life_events_fc_progress';
     const STORAGE_CL = 'life_events_checklist';
     const STORAGE_EXAM_HISTORY = 'life_events_exam_history';
+    const STORAGE_THEME = 'life_events_theme';
     const EXAM_HISTORY_MAX = 50;
     const FC_REQUEUE_GOOD = 5;
     const FC_REQUEUE_BAD = 5;
     const FC_WEAK_THRESHOLD = 2;
+    const MM_DEFAULT_ID = "hc1";
+    let currentMmId = MM_DEFAULT_ID;
+    let mermaidApi = null;
+    let mermaidThemeUsed = null;
+    const mmRendered = new Set();
 
     let CARDS = loadCards();
     let fcProgress = loadFcProgress();
@@ -2256,6 +2349,48 @@
     let editingId = null;
     let editorFilterSection = 'all';
     let editorSearch = '';
+
+    function getTheme() {
+      return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    }
+
+    function getMermaidTheme() {
+      return getTheme() === 'dark' ? 'dark' : 'neutral';
+    }
+
+    function applyTheme(theme, save = true) {
+      if (theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+      else document.documentElement.removeAttribute('data-theme');
+      if (save) {
+        try { localStorage.setItem(STORAGE_THEME, theme); } catch (e) {}
+      }
+      const btn = document.getElementById('btn-theme-toggle');
+      if (btn) {
+        btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+        btn.title = theme === 'dark' ? 'Licht thema' : 'Donker thema';
+        btn.setAttribute('aria-label', btn.title);
+      }
+      refreshMermaidTheme();
+    }
+
+    function initTheme() {
+      let theme;
+      try { theme = localStorage.getItem(STORAGE_THEME); } catch (e) {}
+      if (!theme) {
+        theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      applyTheme(theme, false);
+    }
+
+    function refreshMermaidTheme() {
+      const next = getMermaidTheme();
+      if (mermaidThemeUsed === next && mermaidApi) return;
+      mermaidThemeUsed = next;
+      mermaidApi = null;
+      mmRendered.clear();
+      const panel = document.getElementById('panel-mindmaps');
+      if (panel && panel.classList.contains('active') && currentMmId) showMindmap(currentMmId);
+    }
 
     function loadFcProgress() {
       let raw = {};
@@ -2424,7 +2559,6 @@
     const examNav = document.getElementById('exam-nav');
     const mindmapNav = document.getElementById('mindmap-nav');
     const sidebarTitle = document.getElementById('sidebar-title');
-    const MM_DEFAULT_ID = "hc1";
 
     function switchPanel(name) {
       tabs.forEach(t => t.classList.toggle('active', t.dataset.panel === name));
@@ -3259,7 +3393,7 @@
         return `<div class="exam-review-item ${cls}">
           <strong>Vraag ${i + 1}:</strong> ${escapeHtml(a.q)}<br>
           Jouw antwoord: ${chosenText}<br>
-          ${a.chosen !== a.correct ? '<span style="color:#b91c1c">Correct: ' + correctText + '</span>' : '<span style="color:var(--success)">Correct</span>'}
+          ${a.chosen !== a.correct ? '<span style="color:var(--danger)">Correct: ' + correctText + '</span>' : '<span style="color:var(--success)">Correct</span>'}
         </div>`;
       }).join('');
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -3320,20 +3454,18 @@
     });
 
     // Mindmaps (Mermaid)
-    let currentMmId = MM_DEFAULT_ID;
-    let mermaidApi = null;
-    const mmRendered = new Set();
-
     async function initMermaid() {
-      if (mermaidApi) return mermaidApi;
+      const theme = getMermaidTheme();
+      if (mermaidApi && mermaidThemeUsed === theme) return mermaidApi;
       const mod = await import('https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs');
       mermaidApi = mod.default;
       mermaidApi.initialize({
         startOnLoad: false,
-        theme: 'neutral',
+        theme: theme,
         securityLevel: 'loose',
         mindmap: { padding: 16, useMaxWidth: true },
       });
+      mermaidThemeUsed = theme;
       return mermaidApi;
     }
 
@@ -3366,6 +3498,11 @@
 
     document.querySelectorAll('.mm-nav-btn').forEach(btn => {
       btn.addEventListener('click', () => showMindmap(btn.dataset.mmId));
+    });
+
+    initTheme();
+    document.getElementById('btn-theme-toggle').addEventListener('click', () => {
+      applyTheme(getTheme() === 'dark' ? 'light' : 'dark');
     });
 
     rebuildFcNav();
