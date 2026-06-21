@@ -197,6 +197,7 @@ html = f"""<!DOCTYPE html>
       --weak-item-hover: #ea580c;
       --weak-badge-bg: #ffedd5;
       --weak-badge-fg: #c2410c;
+      --fc-back-bg: #f8fafc;
       --radius: 12px;
       --sidebar-w: 260px;
     }}
@@ -232,6 +233,7 @@ html = f"""<!DOCTYPE html>
       --weak-item-hover: #ea580c;
       --weak-badge-bg: #431407;
       --weak-badge-fg: #fdba74;
+      --fc-back-bg: #151d2b;
     }}
     * {{ box-sizing: border-box; }}
     html {{ scroll-behavior: smooth; }}
@@ -609,7 +611,7 @@ html = f"""<!DOCTYPE html>
       flex-direction: column;
       justify-content: center;
     }}
-    .fc-back {{ transform: rotateY(180deg); background: #f8fafc; }}
+    .fc-back {{ transform: rotateY(180deg); background: var(--fc-back-bg); }}
     .fc-section {{
       font-size: 0.75rem;
       text-transform: uppercase;
