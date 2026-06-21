@@ -434,6 +434,75 @@ html = f"""<!DOCTYPE html>
       margin-left: auto;
       margin-right: auto;
     }}
+    .fc-stage-toolbar-actions {{
+      display: flex;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }}
+    .fc-fullscreen-editor {{
+      display: none;
+      max-width: 960px;
+      width: 100%;
+      margin: auto;
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+    }}
+    .fc-fullscreen-editor h3 {{
+      margin: 0 0 1rem;
+      font-size: 1rem;
+    }}
+    .fc-fullscreen-editor label {{
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin: 0.75rem 0 0.35rem;
+      color: var(--muted);
+    }}
+    .fc-fullscreen-editor input,
+    .fc-fullscreen-editor textarea {{
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      font: inherit;
+      box-sizing: border-box;
+    }}
+    .fc-fullscreen-editor textarea {{
+      min-height: 90px;
+      resize: vertical;
+    }}
+    .fc-fullscreen-editor-actions {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }}
+    .fc-fullscreen-editor-actions button {{
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.9rem;
+    }}
+    .fc-fullscreen-editor-actions button.primary {{
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+      font-weight: 600;
+    }}
+    .fc-stage.fullscreen.fc-editing .fc-fullscreen-editor {{
+      display: block;
+    }}
+    .fc-stage.fullscreen.fc-editing .flashcard-wrap,
+    .fc-stage.fullscreen.fc-editing .fc-hint,
+    .fc-stage.fullscreen.fc-editing .fc-actions {{
+      display: none;
+    }}
     .flashcard-wrap {{
       perspective: 1200px;
       margin: 0 auto 1.5rem;
@@ -1075,7 +1144,23 @@ html = f"""<!DOCTYPE html>
               <div class="fc-progress-bar"><div class="fc-progress-fill" id="fc-progress-fill-fullscreen"></div></div>
               <div class="fc-session-stats" id="fc-session-stats-fullscreen"></div>
             </div>
-            <button type="button" id="btn-fc-fullscreen" title="Groot scherm (Esc om te sluiten)">⛶ Groot scherm</button>
+            <div class="fc-stage-toolbar-actions">
+              <button type="button" id="btn-fc-edit" title="Huidige kaart bewerken" style="display:none">✎ Bewerk</button>
+              <button type="button" id="btn-fc-fullscreen" title="Groot scherm (Esc om te sluiten)">⛶ Groot scherm</button>
+            </div>
+          </div>
+          <div class="fc-fullscreen-editor" id="fc-fullscreen-editor" hidden>
+            <h3>Kaart bewerken</h3>
+            <label for="fc-edit-section">Onderwerp / hoorcollege</label>
+            <input list="section-options" id="fc-edit-section" placeholder="bv. Hoorcollege 1: Inleiding">
+            <label for="fc-edit-question">Vraag</label>
+            <textarea id="fc-edit-question" rows="3"></textarea>
+            <label for="fc-edit-answer">Antwoord</label>
+            <textarea id="fc-edit-answer" rows="6"></textarea>
+            <div class="fc-fullscreen-editor-actions">
+              <button type="button" class="primary" id="btn-fc-save-card">Opslaan</button>
+              <button type="button" id="btn-fc-cancel-edit">Annuleren</button>
+            </div>
           </div>
           <div class="flashcard-wrap" id="fc-wrap">
             <div class="flashcard" id="flashcard" aria-live="polite">
@@ -1264,6 +1349,7 @@ html = f"""<!DOCTYPE html>
     let weakStudyMode = false;
     let listVisible = false;
     let fcFullscreen = false;
+    let fcFullscreenEditing = false;
     let editingId = null;
     let editorFilterSection = 'all';
     let editorSearch = '';
@@ -1564,6 +1650,10 @@ html = f"""<!DOCTYPE html>
         document.getElementById('fc-section-back').textContent = '';
         document.getElementById('fc-status-badge').textContent = '';
         document.getElementById('fc-status-badge-back').textContent = '';
+        if (fcFullscreen) {{
+          document.getElementById('btn-fc-edit').style.display = 'none';
+          if (fcFullscreenEditing) closeFcFullscreenEditor();
+        }}
         return;
       }}
       const c = queue[index];
@@ -1580,6 +1670,7 @@ html = f"""<!DOCTYPE html>
       }}
       document.getElementById('fc-status-badge').textContent = badge;
       document.getElementById('fc-status-badge-back').textContent = badge;
+      if (fcFullscreen) document.getElementById('btn-fc-edit').style.display = 'inline-block';
     }}
 
     function updateStats() {{
@@ -1675,11 +1766,70 @@ html = f"""<!DOCTYPE html>
       updateWeakStudyButtons();
     }}
 
+    function updateCardContent(card, data) {{
+      const oldKey = cardKey(card);
+      Object.assign(card, data);
+      const newKey = cardKey(card);
+      if (oldKey !== newKey && fcProgress[oldKey]) {{
+        fcProgress[newKey] = mergeProgressEntry(fcProgress[newKey], fcProgress[oldKey]);
+        delete fcProgress[oldKey];
+        saveFcProgress();
+      }}
+    }}
+
+    function readFullscreenEditorForm() {{
+      return {{
+        section: document.getElementById('fc-edit-section').value.trim() || 'Eigen kaarten',
+        q: document.getElementById('fc-edit-question').value.trim(),
+        a: document.getElementById('fc-edit-answer').value.trim(),
+      }};
+    }}
+
+    function openFcFullscreenEditor() {{
+      if (!fcFullscreen || !queue.length) return;
+      const card = queue[index];
+      fcFullscreenEditing = true;
+      document.getElementById('fc-stage').classList.add('fc-editing');
+      document.getElementById('fc-fullscreen-editor').hidden = false;
+      document.getElementById('btn-fc-edit').textContent = '✕ Sluit bewerken';
+      document.getElementById('fc-edit-section').value = card.section;
+      document.getElementById('fc-edit-question').value = card.q;
+      document.getElementById('fc-edit-answer').value = card.a;
+      document.getElementById('fc-edit-question').focus();
+    }}
+
+    function closeFcFullscreenEditor() {{
+      fcFullscreenEditing = false;
+      document.getElementById('fc-stage').classList.remove('fc-editing');
+      document.getElementById('fc-fullscreen-editor').hidden = true;
+      document.getElementById('btn-fc-edit').textContent = '✎ Bewerk';
+    }}
+
+    function saveFcFullscreenEditor() {{
+      if (!queue.length) return;
+      const data = readFullscreenEditorForm();
+      if (!data.q || !data.a) {{
+        alert('Vul minstens een vraag en antwoord in.');
+        return;
+      }}
+      const card = queue[index];
+      updateCardContent(card, data);
+      saveCards();
+      applyFilter();
+      closeFcFullscreenEditor();
+      renderCard();
+      renderList();
+      renderWeakList();
+      showSaved();
+    }}
+
     function toggleFcFullscreen() {{
+      if (fcFullscreen && fcFullscreenEditing) closeFcFullscreenEditor();
       fcFullscreen = !fcFullscreen;
       const stage = document.getElementById('fc-stage');
       stage.classList.toggle('fullscreen', fcFullscreen);
       document.getElementById('fc-fullscreen-progress').setAttribute('aria-hidden', fcFullscreen ? 'false' : 'true');
+      document.getElementById('btn-fc-edit').style.display = fcFullscreen && queue.length ? 'inline-block' : 'none';
       document.body.style.overflow = fcFullscreen ? 'hidden' : '';
       document.getElementById('btn-fc-fullscreen').textContent = fcFullscreen ? '✕ Sluit groot scherm' : '⛶ Groot scherm';
       if (fcFullscreen) updateStats();
@@ -1691,6 +1841,12 @@ html = f"""<!DOCTYPE html>
     document.getElementById('btn-easy').addEventListener('click', rateGood);
     document.getElementById('btn-hard').addEventListener('click', rateBad);
     document.getElementById('btn-fc-fullscreen').addEventListener('click', toggleFcFullscreen);
+    document.getElementById('btn-fc-edit').addEventListener('click', () => {{
+      if (fcFullscreenEditing) closeFcFullscreenEditor();
+      else openFcFullscreenEditor();
+    }});
+    document.getElementById('btn-fc-save-card').addEventListener('click', saveFcFullscreenEditor);
+    document.getElementById('btn-fc-cancel-edit').addEventListener('click', closeFcFullscreenEditor);
 
     document.getElementById('btn-shuffle').addEventListener('click', () => {{
       buildQueue(true);
@@ -1736,8 +1892,11 @@ html = f"""<!DOCTYPE html>
 
     document.getElementById('btn-edit-current').addEventListener('click', () => {{
       if (!queue.length) return;
-      openEditorForCard(queue[index].id);
-      switchPanel('editor');
+      if (fcFullscreen) openFcFullscreenEditor();
+      else {{
+        openEditorForCard(queue[index].id);
+        switchPanel('editor');
+      }}
     }});
 
     function renderList() {{
@@ -1825,7 +1984,7 @@ html = f"""<!DOCTYPE html>
       }}
       if (editingId) {{
         const card = CARDS.find(c => c.id === editingId);
-        if (card) Object.assign(card, data);
+        if (card) updateCardContent(card, data);
       }} else {{
         const card = {{ id: newId(), ...data }};
         CARDS.push(card);
@@ -1936,7 +2095,8 @@ html = f"""<!DOCTYPE html>
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
       if (e.code === 'Escape' && fcFullscreen) {{
         e.preventDefault();
-        toggleFcFullscreen();
+        if (fcFullscreenEditing) closeFcFullscreenEditor();
+        else toggleFcFullscreen();
         return;
       }}
       if (e.code === 'Space') {{ e.preventDefault(); flipCard(); }}
